@@ -71,11 +71,13 @@ class Features(enum.Flag):
     KW_ONLY = enum.auto()
     HASH = enum.auto()
     SLOTS = enum.auto()
-    KW_ONLY = enum.auto()
+
+    # TODO: implement
+    PRIVATE = enum.auto()
 
     NONE = 0
     DEFAULT = INIT | REPR | EQ
-    ALL = INIT | REPR | EQ | ORDER | FROZEN | KW_ONLY | HASH | SLOTS | KW_ONLY
+    ALL = INIT | REPR | EQ | ORDER | FROZEN | KW_ONLY | HASH | SLOTS | PRIVATE
 
 
 class Classno:
