@@ -16,7 +16,6 @@ NOTES:
 """
 
 from netsome import types as nst
-from dataclasses import dataclass, Field as f
 
 from classno import root
 
@@ -40,9 +39,9 @@ class Foo2(Foo):
 class Test(root.Classno):
     a: int = 1
     b: str = root.field(default="foobar")
-    c: "str"
+    c: "str" = root.field()
     d: nst.IPv4Address = root.field(default_factory=lambda: nst.IPv4Address("1.1.1.1"))
-    e: list[nst.ASN]
+    e: list[nst.ASN] = 1
 
 
 t = Test()

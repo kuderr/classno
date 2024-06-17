@@ -1,16 +1,14 @@
-import typing as t
-
-import types
-import operator
-import functools
 import enum
+import operator
+import types
+import typing as t
 
 
 class MissingType: ...
 
 
 MISSING = MissingType
-_CLASSNO_ATTRS = {"__features__", "_Classno__fields"}
+_CLASSNO_ATTRS = {"__features__", "__fields__"}
 
 
 class Field:
@@ -73,33 +71,38 @@ class Features(enum.Flag):
     KW_ONLY = enum.auto()
     HASH = enum.auto()
     SLOTS = enum.auto()
+    KW_ONLY = enum.auto()
 
     NONE = 0
-    DEFAULT = INIT | REPR | EQ | ORDER | FROZEN | KW_ONLY | HASH | SLOTS
+    DEFAULT = INIT | REPR | EQ
+    ALL = INIT | REPR | EQ | ORDER | FROZEN | KW_ONLY | HASH | SLOTS | KW_ONLY
 
 
 class Classno:
-    __fields: t.ClassVar[dict[str, Field]] = {}
-    __features__: t.ClassVar[Features] = Features.DEFAULT
+    __fields__: t.ClassVar[dict[str, Field]] = {}
+    __features__: t.ClassVar[Features] = Features.ALL
 
     def __init_subclass__(cls):
-        cls.__fields = build_fields(cls)
+        cls.__fields__ = build_fields(cls)
+
+        # TODO: implement all features for cls and fields
+        process_features(cls)
 
     def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
         missing_required_pos_args = []
-        for field in self.__fields.values():
+        for field in self.__fields__.values():
             if hasattr(self, field.name) and not isinstance(
                 getattr(self, field.name), Field
             ):
+                setattr(self, field.name, getattr(self, field.name))
                 continue
 
             if field.default is not MISSING:
                 setattr(self, field.name, field.default)
             elif field.default_factory is not MISSING:
                 setattr(self, field.name, field.default_factory())
+            elif field.name in kwargs:
+                setattr(self, field.name, kwargs[field.name])
             else:
                 missing_required_pos_args.append(field.name)
 
@@ -111,13 +114,13 @@ class Classno:
 
     # @functools.cached_property
     @property
-    def __key(self):
-        return tuple(getattr(self, f.name) for f in self.__fields.values())
+    def _key(self):
+        return tuple(getattr(self, f.name) for f in self.__fields__.values())
 
     # @functools.cached_property
     @property
     def as_dict(self):
-        return {f.name: getattr(self, f.name) for f in self.__fields.values()}
+        return {f.name: getattr(self, f.name) for f in self.__fields__.values()}
 
     # @functools.cached_property
     @property
@@ -129,7 +132,7 @@ class Classno:
 
     # if only immutable
     def __hash__(self) -> int:
-        return hash(self.__key)
+        return hash(self._key)
 
     def __eq__(self, other: object) -> bool:
         return self.__cmp_factory(other, operator.eq)
@@ -147,7 +150,15 @@ class Classno:
         return self.__cmp_factory(other, operator.ge)
 
     def __cmp_factory(self, other: object, op: str) -> bool:
-        if not (other.__class__ is self.__class__):
+        if other.__class__ is not self.__class__:
             return NotImplemented
 
-        return op(self.__key, other.__key)
+        return op(self._key, other._key)
+
+
+def process_features(cls: t.Type[Classno]) -> None:
+    fields = cls.__fields__
+    features = cls.__features__
+
+    if Features.SLOTS in features:
+        cls.__slots__ = tuple(f.name for f in fields.values())
