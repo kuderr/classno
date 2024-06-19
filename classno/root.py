@@ -47,12 +47,7 @@ def build_fields(cls):
             continue
 
         attr = getattr(cls, name, MISSING)
-        if isinstance(attr, Field):
-            f = attr
-        else:
-            if isinstance(attr, types.MemberDescriptorType):
-                attr = MISSING
-            f = field(default=attr)
+        f = attr if isinstance(attr, Field) else field(default=attr)
 
         f.name = name
         f.hint = hint
@@ -91,27 +86,22 @@ class Classno:
         process_features(cls)
 
     def __init__(self, **kwargs):
-        missing_required_pos_args = []
-        for field in self.__fields__.values():
-            if hasattr(self, field.name) and not isinstance(
-                getattr(self, field.name), Field
-            ):
-                setattr(self, field.name, getattr(self, field.name))
-                continue
+        missing_fields = []
 
-            if field.default is not MISSING:
+        for field in self.__fields__.values():
+            if field.name in kwargs:
+                setattr(self, field.name, kwargs[field.name])
+            elif field.default is not MISSING:
                 setattr(self, field.name, field.default)
             elif field.default_factory is not MISSING:
                 setattr(self, field.name, field.default_factory())
-            elif field.name in kwargs:
-                setattr(self, field.name, kwargs[field.name])
             else:
-                missing_required_pos_args.append(field.name)
+                missing_fields.append(field.name)
 
-        if missing_required_pos_args:
+        if missing_fields:
             raise TypeError(
-                f"{self.__class__.__name__}.__init__() missing {len(missing_required_pos_args)} "
-                f"required positional arguments: {', '.join(f'{arg}' for arg in missing_required_pos_args)}"
+                f"{self.__class__.__name__}.__init__() missing {len(missing_fields)} "
+                f"required arguments: {', '.join(f'{arg}' for arg in missing_fields)}"
             )
 
     # @functools.cached_property
