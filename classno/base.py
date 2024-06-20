@@ -20,23 +20,9 @@ from netsome import types as nst
 from classno import root
 
 
-class Foo:
-    a: str
-    b: int
-    ip: nst.IPv4Address
-
-    d: dict[str, int]
-    d2: dict[str, list[bool]]
-
-
-class Foo1(Foo): ...
-
-
-class Foo2(Foo):
-    a: int = 2
-
-
 class Test(root.Classno):
+    __features__ = root.Features.DEFAULT | root.Features.SLOTS | root.Features.FROZEN
+
     a: int = 1
     b: str = root.field(default="foobar")
     c: "str" = root.field()
