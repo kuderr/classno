@@ -29,7 +29,7 @@ class Field:
 
     def __repr__(self) -> str:
         return (
-            "Field("
+            f"{self.__class__.__name__}("
             f"name={self.name!r}, "
             f"hint={self.hint!r}, "
             f"default={self.default!r}, "
@@ -109,13 +109,11 @@ class Classno:
         return ", ".join(f"{k!s}={v!r}" for k, v in self.as_dict().items())
 
     def __repr__(self) -> str:
-        # return ", ".join(f"{k!s}={v!r}" for k, v in self._repr_dict.items())
         return f"{self.__class__.__name__}({self.as_kwargs()})"
 
     def _hash_key(self):
         return tuple(getattr(self, f.name) for f in self.__fields__.values())
 
-    # if only immutable
     def __hash__(self) -> int:
         return hash(self._hash_key())
 
@@ -170,8 +168,8 @@ def preprocess_features(cls: t.Type[Classno]) -> None:
         cls.__slots__ = tuple(f.name for f in fields.values())
 
 
-def _raise_frozen_attr_exc(*args, **kwargs):
-    raise Exception("lala")
+def _raise_frozen_attr_exc(self, *args, **kwargs):
+    raise Exception(f"Cannot modify attrs of class {self.__class__.__name__}")
 
 
 def postprocess_features(cls: t.Type[Classno]) -> None:
@@ -180,5 +178,14 @@ def postprocess_features(cls: t.Type[Classno]) -> None:
     if Features.FROZEN in features:
         cls.__setattr__ = cls.__delattr__ = _raise_frozen_attr_exc
     if Features.PRIVATE in features:
-        # TODO
-        ...
+        cls.__setattr__ = __privates_setattr__
+
+
+def __privates_setattr__(self: Classno, name: str, value: t.Any) -> None:
+    if name in self.__fields__:
+        raise Exception("privates only")
+
+    if name.startswith("_") and name[1:] in self.__fields__:
+        return super(self.__class__, self).__setattr__(name[1:], value)
+
+    return super(self.__class__, self).__setattr__(name, value)

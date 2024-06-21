@@ -21,7 +21,7 @@ from classno import root
 
 
 class Test(root.Classno):
-    __features__ = root.Features.DEFAULT | root.Features.SLOTS | root.Features.FROZEN
+    __features__ = root.Features.DEFAULT | root.Features.PRIVATE
 
     a: int = 1
     b: str = root.field(default="foobar")
