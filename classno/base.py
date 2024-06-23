@@ -17,16 +17,20 @@ NOTES:
 
 from netsome import types as nst
 
-from classno import root
+import classno
 
 
-class Test(root.Classno):
-    __features__ = root.Features.DEFAULT | root.Features.PRIVATE
+class Test(classno.Classno):
+    __features__ = (
+        classno.Features.DEFAULT | classno.Features.HASH | classno.Features.PRIVATE
+    )
 
     a: int = 1
-    b: str = root.field(default="foobar")
-    c: "str" = root.field()
-    d: nst.IPv4Address = root.field(default_factory=lambda: nst.IPv4Address("1.1.1.1"))
+    b: str = classno.field(default="foobar")
+    c: "str" = classno.field(default="gg")
+    d: nst.IPv4Address = classno.field(
+        default_factory=lambda: nst.IPv4Address("1.1.1.1")
+    )
     e: list[nst.ASN] = 1
 
 
