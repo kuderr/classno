@@ -1,8 +1,7 @@
 import enum
 
 
-class MissingType:
-    ...
+class MissingType: ...
 
 
 MISSING = MissingType

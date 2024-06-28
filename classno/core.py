@@ -49,9 +49,14 @@ class Classno(metaclass=MetaClassno):
     __eq_keys__: t.ClassVar[set[str]] = set()
     __order_keys__: t.ClassVar[set[str]] = set()
 
-    _hash_value = lambda self: tuple(getattr(self, k) for k in self.__hash_keys__)
-    _eq_value = lambda self: tuple(getattr(self, k) for k in self.__eq_keys__)
-    _order_value = lambda self: tuple(getattr(self, k) for k in self.__order_keys__)
+    def _hash_value(self):
+        return tuple(getattr(self, k) for k in self.__hash_keys__)
+
+    def _eq_value(self):
+        return tuple(getattr(self, k) for k in self.__eq_keys__)
+
+    def _order_value(self):
+        return tuple(getattr(self, k) for k in self.__order_keys__)
 
     def as_dict(self):
         return {f.name: getattr(self, f.name) for f in self.__fields__.values()}
