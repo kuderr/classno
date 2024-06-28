@@ -30,14 +30,14 @@ class MetaClassno(type):
         klass = super().__new__(cls, name, bases, attrs)
         _utils.set_fields(klass)
         _utils.set_keys(klass)
-        _utils.preprocess_features(klass)
+        _utils.process_cls_features(klass)
         return klass
 
     def __call__(cls, *args, **kwargs):
         # Called on SubClassno(...)
         obj = type.__call__(cls, *args, **kwargs)
         init_obj(obj, *args, **kwargs)
-        _utils.postprocess_features(cls)
+        _utils.process_obj_features(obj)
         return obj
 
 
@@ -48,15 +48,6 @@ class Classno(metaclass=MetaClassno):
     __hash_keys__: t.ClassVar[set[str]] = set()
     __eq_keys__: t.ClassVar[set[str]] = set()
     __order_keys__: t.ClassVar[set[str]] = set()
-
-    def _hash_value(self):
-        return tuple(getattr(self, k) for k in self.__hash_keys__)
-
-    def _eq_value(self):
-        return tuple(getattr(self, k) for k in self.__eq_keys__)
-
-    def _order_value(self):
-        return tuple(getattr(self, k) for k in self.__order_keys__)
 
     def as_dict(self):
         return {f.name: getattr(self, f.name) for f in self.__fields__.values()}
@@ -70,8 +61,14 @@ class Classno(metaclass=MetaClassno):
     def __hash__(self) -> int:
         return hash(self._hash_value())
 
+    def _hash_value(self):
+        return tuple(getattr(self, k) for k in self.__hash_keys__)
+
     def __eq__(self, other: object) -> bool:
         return self._cmp_factory(other, operator.eq, self._eq_value.__name__)
+
+    def _eq_value(self):
+        return tuple(getattr(self, k) for k in self.__eq_keys__)
 
     def __lt__(self, other: object) -> bool:
         return self._cmp_factory(other, operator.lt, self._order_value.__name__)
@@ -84,6 +81,9 @@ class Classno(metaclass=MetaClassno):
 
     def __ge__(self, other: object) -> bool:
         return self._cmp_factory(other, operator.ge, self._order_value.__name__)
+
+    def _order_value(self):
+        return tuple(getattr(self, k) for k in self.__order_keys__)
 
     def _cmp_factory(
         self,

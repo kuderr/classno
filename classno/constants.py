@@ -26,6 +26,8 @@ class Features(enum.Flag):
     FROZEN = enum.auto()
     PRIVATE = enum.auto()
 
+    VALIDATION = enum.auto()
+
     NONE = 0
     DEFAULT = EQ | ORDER
     IMMUTABLE = DEFAULT | HASH | SLOTS | FROZEN

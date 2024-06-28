@@ -1,3 +1,5 @@
+import contextlib
+import types
 import typing as t
 
 from classno import _fields
@@ -31,32 +33,43 @@ def set_keys(cls: t.Type) -> None:
         setattr(cls, cls_keys_attr, attr)
 
 
-def preprocess_features(cls: t.Type) -> None:
+def process_cls_features(cls: t.Type) -> None:
     fields = cls.__fields__
     features = cls.__features__
 
-    # process if all these methods already set in cls
+    # TODO: process if all these methods already set in cls
     if c.Features.EQ not in features:
-        cls.__eq__ = None
+        cls.__eq__ = cls._eq_value = None
     if c.Features.ORDER not in features:
-        cls.__lt__ = cls.__le__ = cls.__gt__ = cls.__ge__ = None
+        cls.__lt__ = cls.__le__ = cls.__gt__ = cls.__ge__ = cls._order_value = None
     if c.Features.HASH not in features:
-        cls.__hash__ = None
+        cls.__hash__ = cls._hash_value = None
     if c.Features.SLOTS in features:
         cls.__slots__ = tuple(f.name for f in fields.values())
 
 
-def raise_frozen_attr_exc(self, *args, **kwargs):
-    raise Exception(f"Cannot modify attrs of class {self.__class__.__name__}")
-
-
-def postprocess_features(cls: t.Type) -> None:
-    features = cls.__features__
+def process_obj_features(obj: object) -> None:
+    fields = obj.__fields__
+    features = obj.__features__
 
     if c.Features.FROZEN in features:
-        cls.__setattr__ = cls.__delattr__ = raise_frozen_attr_exc
+        obj.__setattr__ = obj.__delattr__ = raise_frozen_attr_exc
     if c.Features.PRIVATE in features:
-        cls.__setattr__ = privates_setattr
+        obj.__setattr__ = privates_setattr
+    if c.Features.VALIDATION in features:
+        for field in fields.values():
+            attr = getattr(obj, field.name)
+            try:
+                validate_value_hint(attr, field.hint)
+            except TypeError as e:
+                raise TypeError(
+                    f"For field {field.name} expected type of {field.hint}, "
+                    f"got {attr} of type {type(attr)}"
+                ) from e
+
+
+def raise_frozen_attr_exc(self, *args, **kwargs):
+    raise Exception(f"Cannot modify attrs of class {self.__class__.__name__}")
 
 
 def privates_setattr(self, name: str, value: t.Any) -> None:
@@ -67,3 +80,26 @@ def privates_setattr(self, name: str, value: t.Any) -> None:
         return super(self.__class__, self).__setattr__(name[1:], value)
 
     return super(self.__class__, self).__setattr__(name, value)
+
+
+def validate_value_hint(value, hint):
+    # can save origin and args to Field itself ?
+    origin = t.get_origin(hint)
+
+    # Simple type: int, bool, str, CustomClass, etc.
+    if not origin and not isinstance(value, hint):
+        raise TypeError
+
+    # Unions: str | None, int | float, etc.
+    if isinstance(hint, types.UnionType):
+        for sub_hint in t.get_args(hint):
+            with contextlib.suppress(TypeError):
+                validate_value_hint(value, sub_hint)
+                return
+
+        raise TypeError
+
+    # NOTE: types within generics are not validating yet
+    # Generic types: dict[str, int], list[str], etc.
+    if origin and not isinstance(value, origin):
+        raise TypeError
