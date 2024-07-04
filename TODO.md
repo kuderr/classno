@@ -5,7 +5,6 @@ Features:
 More stuff:
 
 - Autovalidating, if needed
-- `__setattr__` validation
 - Autocasting: strict/lossless or lossy, if needed
 - go deep through annotation and validate/cast stuff
 

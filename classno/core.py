@@ -8,13 +8,15 @@ from classno import constants as c
 def init_obj(self: "Classno", *args, **kwargs):
     missing_fields = []
 
+    _setattr = super(self.__class__, self).__setattr__
+
     for field in self.__fields__.values():
         if field.name in kwargs:
-            setattr(self, field.name, kwargs[field.name])
+            _setattr(field.name, kwargs[field.name])
         elif field.default is not c.MISSING:
-            setattr(self, field.name, field.default)
+            _setattr(field.name, field.default)
         elif field.default_factory is not c.MISSING:
-            setattr(self, field.name, field.default_factory())
+            _setattr(field.name, field.default_factory())
         else:
             missing_fields.append(field.name)
 

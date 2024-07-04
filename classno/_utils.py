@@ -46,26 +46,72 @@ def process_cls_features(cls: t.Type) -> None:
         cls.__hash__ = cls._hash_value = None
     if c.Features.SLOTS in features:
         cls.__slots__ = tuple(f.name for f in fields.values())
+    if c.Features.FROZEN in features:
+        cls.__setattr__ = cls.__delattr__ = raise_frozen_attr_exc
+    if c.Features.PRIVATE in features:
+        cls.__setattr__ = privates_setattr
+    if c.Features.VALIDATION in features:
+        cls.__setattr__ = validated_setattr
+
+    # TODO(kuderr): make it prettier
+    if c.Features.VALIDATION | c.Features.PRIVATE in features:
+        cls.__setattr__ = private_validated_setattr
 
 
 def process_obj_features(obj: object) -> None:
-    fields = obj.__fields__
     features = obj.__features__
 
-    if c.Features.FROZEN in features:
-        obj.__setattr__ = obj.__delattr__ = raise_frozen_attr_exc
-    if c.Features.PRIVATE in features:
-        obj.__setattr__ = privates_setattr
     if c.Features.VALIDATION in features:
-        for field in fields.values():
-            attr = getattr(obj, field.name)
-            try:
-                validate_value_hint(attr, field.hint)
-            except TypeError as e:
-                raise TypeError(
-                    f"For field {field.name} expected type of {field.hint}, "
-                    f"got {attr} of type {type(attr)}"
-                ) from e
+        _validate_fields(obj)
+
+
+def private_validated_setattr(self, name: str, value: t.Any) -> None:
+    if name in self.__fields__:
+        raise Exception("privates only")
+
+    if name.startswith("_") and name[1:] not in self.__fields__:
+        raise Exception(f"Attr {name} not found")
+
+    field = self.__fields__[name[1:]]
+    try:
+        validate_value_hint(value, field.hint)
+    except TypeError:
+        raise TypeError(
+            f"For field {field.name} expected type of {field.hint}, "
+            f"got {value} of type {type(value)}"
+        )
+
+    return super(self.__class__, self).__setattr__(name, value)
+
+
+def validated_setattr(self, name: str, value: t.Any) -> None:
+    if name not in self.__fields__:
+        raise Exception(f"Attr {name} not found")
+
+    field = self.__fields__[name]
+    try:
+        validate_value_hint(value, field.hint)
+    except TypeError:
+        raise TypeError(
+            f"For field {field.name} expected type of {field.hint}, "
+            f"got {value} of type {type(value)}"
+        )
+
+    return super(self.__class__, self).__setattr__(name, value)
+
+
+def _validate_fields(obj):
+    fields = obj.__fields__
+
+    for field in fields.values():
+        attr = getattr(obj, field.name)
+        try:
+            validate_value_hint(attr, field.hint)
+        except TypeError:
+            raise TypeError(
+                f"For field {field.name} expected type of {field.hint}, "
+                f"got {attr} of type {type(attr)}"
+            )
 
 
 def raise_frozen_attr_exc(self, *args, **kwargs):

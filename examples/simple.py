@@ -3,15 +3,15 @@ import random
 import classno
 
 
-def random_asn():
+def random_ipv4():
     number = random.randint(65000, 65535)
-    return nst.ASN(number)
+    return nst.IPv4Address.from_int(number)
 
 
 class SubClassno(classno.Classno):
     a: int = 1
     b: str = classno.field(default="foobar")
-    c: nst.IPv4Address = classno.field(default_factory=random_asn)
+    c: nst.IPv4Address = classno.field(default_factory=random_ipv4)
     d: list[str] = ["Foo", "Bar"]
 
 
