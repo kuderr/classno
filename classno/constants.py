@@ -13,6 +13,11 @@ _CLASSNO_KEYS_ATTRS = {
 _CLASSNO_ATTRS = {
     "__features__",
     "__fields__",
+    "__init_hook__",
+    "__set_keys_hook__",
+    "__set_fields_hook__",
+    "__process_cls_features_hook__",
+    "__process_obj_features_hook__",
 } | _CLASSNO_KEYS_ATTRS
 
 

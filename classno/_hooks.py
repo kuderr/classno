@@ -6,6 +6,28 @@ from classno import _validation
 from classno import constants as c
 
 
+def init_obj(self, *args, **kwargs):
+    missing_fields = []
+
+    _setattr = super(self.__class__, self).__setattr__
+
+    for field in self.__fields__.values():
+        if field.name in kwargs:
+            _setattr(field.name, kwargs[field.name])
+        elif field.default is not c.MISSING:
+            _setattr(field.name, field.default)
+        elif field.default_factory is not c.MISSING:
+            _setattr(field.name, field.default_factory())
+        else:
+            missing_fields.append(field.name)
+
+    if missing_fields:
+        raise TypeError(
+            f"{self.__class__.__name__}.__init__() missing {len(missing_fields)} "
+            f"required arguments: {', '.join(f'{arg}' for arg in missing_fields)}"
+        )
+
+
 def set_fields(cls: t.Type) -> None:
     hints = t.get_type_hints(cls)
 

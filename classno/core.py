@@ -2,45 +2,23 @@ import operator
 import typing as t
 
 from classno import _fields
-from classno import _utils
+from classno import _hooks
 from classno import constants as c
-
-
-def init_obj(self: "Classno", *args, **kwargs):
-    missing_fields = []
-
-    _setattr = super(self.__class__, self).__setattr__
-
-    for field in self.__fields__.values():
-        if field.name in kwargs:
-            _setattr(field.name, kwargs[field.name])
-        elif field.default is not c.MISSING:
-            _setattr(field.name, field.default)
-        elif field.default_factory is not c.MISSING:
-            _setattr(field.name, field.default_factory())
-        else:
-            missing_fields.append(field.name)
-
-    if missing_fields:
-        raise TypeError(
-            f"{self.__class__.__name__}.__init__() missing {len(missing_fields)} "
-            f"required arguments: {', '.join(f'{arg}' for arg in missing_fields)}"
-        )
 
 
 class MetaClassno(type):
     def __new__(cls, name, bases, attrs):
         klass = super().__new__(cls, name, bases, attrs)
-        _utils.set_fields(klass)
-        _utils.set_keys(klass)
-        _utils.process_cls_features(klass)
+        klass.__set_fields_hook__(klass)
+        klass.__set_keys_hook__(klass)
+        klass.__process_cls_features_hook__(klass)
         return klass
 
     def __call__(cls, *args, **kwargs):
         # Called on SubClassno(...)
         obj = type.__call__(cls, *args, **kwargs)
-        init_obj(obj, *args, **kwargs)
-        _utils.process_obj_features(obj)
+        cls.__init_hook__(obj, *args, **kwargs)
+        cls.__process_obj_features_hook__(obj)
         return obj
 
 
@@ -51,6 +29,12 @@ class Classno(metaclass=MetaClassno):
     __hash_keys__: t.ClassVar[set[str]] = set()
     __eq_keys__: t.ClassVar[set[str]] = set()
     __order_keys__: t.ClassVar[set[str]] = set()
+
+    __init_hook__ = _hooks.init_obj
+    __set_keys_hook__ = _hooks.set_keys
+    __set_fields_hook__ = _hooks.set_fields
+    __process_cls_features_hook__ = _hooks.process_cls_features
+    __process_obj_features_hook__ = _hooks.process_obj_features
 
     def as_dict(self):
         return {f.name: getattr(self, f.name) for f in self.__fields__.values()}
