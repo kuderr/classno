@@ -1,7 +1,8 @@
 import operator
 import typing as t
 
-from classno import _fields, _utils
+from classno import _fields
+from classno import _utils
 from classno import constants as c
 
 

@@ -1,8 +1,8 @@
-import contextlib
-import types
 import typing as t
 
 from classno import _fields
+from classno import _setattrs
+from classno import _validation
 from classno import constants as c
 
 
@@ -47,105 +47,19 @@ def process_cls_features(cls: t.Type) -> None:
     if c.Features.SLOTS in features:
         cls.__slots__ = tuple(f.name for f in fields.values())
     if c.Features.FROZEN in features:
-        cls.__setattr__ = cls.__delattr__ = raise_frozen_attr_exc
+        cls.__setattr__ = cls.__delattr__ = _setattrs.raise_frozen_attr_exc
     if c.Features.PRIVATE in features:
-        cls.__setattr__ = privates_setattr
+        cls.__setattr__ = _setattrs.privates_setattr
     if c.Features.VALIDATION in features:
-        cls.__setattr__ = validated_setattr
+        cls.__setattr__ = _setattrs.validated_setattr
 
     # TODO(kuderr): make it prettier
     if c.Features.VALIDATION | c.Features.PRIVATE in features:
-        cls.__setattr__ = private_validated_setattr
+        cls.__setattr__ = _setattrs.private_validated_setattr
 
 
 def process_obj_features(obj: object) -> None:
     features = obj.__features__
 
     if c.Features.VALIDATION in features:
-        _validate_fields(obj)
-
-
-def private_validated_setattr(self, name: str, value: t.Any) -> None:
-    if name in self.__fields__:
-        raise Exception("privates only")
-
-    if name.startswith("_") and name[1:] not in self.__fields__:
-        raise Exception(f"Attr {name} not found")
-
-    field = self.__fields__[name[1:]]
-    try:
-        validate_value_hint(value, field.hint)
-    except TypeError:
-        raise TypeError(
-            f"For field {field.name} expected type of {field.hint}, "
-            f"got {value} of type {type(value)}"
-        )
-
-    return super(self.__class__, self).__setattr__(name, value)
-
-
-def validated_setattr(self, name: str, value: t.Any) -> None:
-    if name not in self.__fields__:
-        raise Exception(f"Attr {name} not found")
-
-    field = self.__fields__[name]
-    try:
-        validate_value_hint(value, field.hint)
-    except TypeError:
-        raise TypeError(
-            f"For field {field.name} expected type of {field.hint}, "
-            f"got {value} of type {type(value)}"
-        )
-
-    return super(self.__class__, self).__setattr__(name, value)
-
-
-def _validate_fields(obj):
-    fields = obj.__fields__
-
-    for field in fields.values():
-        attr = getattr(obj, field.name)
-        try:
-            validate_value_hint(attr, field.hint)
-        except TypeError:
-            raise TypeError(
-                f"For field {field.name} expected type of {field.hint}, "
-                f"got {attr} of type {type(attr)}"
-            )
-
-
-def raise_frozen_attr_exc(self, *args, **kwargs):
-    raise Exception(f"Cannot modify attrs of class {self.__class__.__name__}")
-
-
-def privates_setattr(self, name: str, value: t.Any) -> None:
-    if name in self.__fields__:
-        raise Exception("privates only")
-
-    if name.startswith("_") and name[1:] in self.__fields__:
-        return super(self.__class__, self).__setattr__(name[1:], value)
-
-    return super(self.__class__, self).__setattr__(name, value)
-
-
-def validate_value_hint(value, hint):
-    # can save origin and args to Field itself ?
-    origin = t.get_origin(hint)
-
-    # Simple type: int, bool, str, CustomClass, etc.
-    if not origin and not isinstance(value, hint):
-        raise TypeError
-
-    # Unions: str | None, int | float, etc.
-    if isinstance(hint, types.UnionType):
-        for sub_hint in t.get_args(hint):
-            with contextlib.suppress(TypeError):
-                validate_value_hint(value, sub_hint)
-                return
-
-        raise TypeError
-
-    # NOTE: types within generics are not validating yet
-    # Generic types: dict[str, int], list[str], etc.
-    if origin and not isinstance(value, origin):
-        raise TypeError
+        _validation._validate_fields(obj)

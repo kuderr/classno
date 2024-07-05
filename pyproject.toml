@@ -5,12 +5,16 @@ requires = ["poetry-core"]
 [tool.poe.env]
 DIRS = "classno tests"
 
+[tool.poe.tasks.lint]
+default_item_type = "cmd"
+sequence = [
+  "poetry run ruff check --no-fix $DIRS",
+  "poetry run toml-sort --check pyproject.toml"
+]
+
 [tool.poe.tasks.pretty]
 default_item_type = "cmd"
 sequence = [
-  "poetry run autoflake --in-place --verbose --recursive $DIRS",
-  "poetry run black $DIRS",
-  "poetry run isort $DIRS",
   "poetry run ruff check --fix $DIRS",
   "poetry run ruff format $DIRS",
   "poetry run toml-sort --in-place --all pyproject.toml"
