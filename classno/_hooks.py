@@ -84,4 +84,4 @@ def process_obj_features(obj: object) -> None:
     features = obj.__features__
 
     if c.Features.VALIDATION in features:
-        _validation._validate_fields(obj)
+        _validation.validate_fields(obj)
