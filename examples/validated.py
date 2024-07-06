@@ -16,6 +16,9 @@ class SubClassno(classno.Classno):
     b: str = classno.field(default="foobar")
     c: nst.IPv4Address = classno.field(default_factory=random_ipv4)
     d: list[str] = ["Foo", "Bar"]
+    e: int | float = 1.0
+    f: dict[str, list[int]] = {}
+    g: tuple[int, ...] = (1, 2)
 
 
 t = SubClassno()
