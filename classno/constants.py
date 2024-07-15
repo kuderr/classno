@@ -33,6 +33,8 @@ class Features(enum.Flag):
 
     VALIDATION = enum.auto()
 
+    LOSSY_AUTOCAST = enum.auto()
+
     NONE = 0
     DEFAULT = EQ | ORDER
     IMMUTABLE = DEFAULT | HASH | SLOTS | FROZEN
