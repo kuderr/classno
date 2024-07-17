@@ -1,6 +1,5 @@
 Features:
 
-- lossy autocasting
 - strict/lossless autocasting ?
 - shadow attrs in as_dict
 - features on fields ?
