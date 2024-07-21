@@ -1,5 +1,6 @@
 import typing as t
 
+from classno import _casting
 from classno import _validation
 
 
@@ -36,6 +37,15 @@ def validated_setattr(self, name: str, value: t.Any) -> None:
         )
 
     return super(self.__class__, self).__setattr__(name, value)
+
+
+def lossy_autocast_setattr(self, name: str, value: t.Any) -> None:
+    if name not in self.__fields__:
+        raise Exception(f"Attr {name} not found")
+
+    field = self.__fields__[name]
+    casted_value = _casting.cast_value(value, field.hint)
+    return super(self.__class__, self).__setattr__(name, casted_value)
 
 
 def raise_frozen_attr_exc(self, *args, **kwargs):

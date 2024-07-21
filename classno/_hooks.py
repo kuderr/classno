@@ -75,9 +75,8 @@ def process_cls_features(cls: t.Type) -> None:
         cls.__setattr__ = _setattrs.privates_setattr
     if c.Features.VALIDATION in features:
         cls.__setattr__ = _setattrs.validated_setattr
-    # TODO
-    # if c.Features.LOSSY_AUTOCAST in features:
-    #     cls.__setattr__ = _setattrs.validated_setattr
+    if c.Features.LOSSY_AUTOCAST in features:
+        cls.__setattr__ = _setattrs.lossy_autocast_setattr
 
     # TODO(kuderr): make it prettier
     if c.Features.VALIDATION | c.Features.PRIVATE in features:
@@ -87,6 +86,7 @@ def process_cls_features(cls: t.Type) -> None:
 def process_obj_features(obj: object) -> None:
     features = obj.__features__
 
+    # TODO: should it work together? if yes – in what order?
     if c.Features.VALIDATION in features:
         _validation.validate_fields(obj)
     if c.Features.LOSSY_AUTOCAST in features:
