@@ -66,16 +66,12 @@ def validate_value_hint(value, hint):
 
         raise TypeError
 
-    # can save origin and args to Field itself ?
     origin = t.get_origin(hint)
-    print(value, hint, origin, t.get_args(hint))
 
     # Simple type: int, bool, str, CustomClass, etc.
     if not origin and not isinstance(value, hint):
         raise TypeError
 
-    # NOTE: types within generics are not validating yet
-    # Generic types: dict[str, int], list[str], etc.
     if origin and not isinstance(value, origin):
         raise TypeError
 
