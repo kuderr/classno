@@ -6,3 +6,5 @@ Features:
 - can set cached properties if immutable ?
 - validate callback on fields?
 - cast callback on fields?
+- setattrs builder
+- process features if methods already set
