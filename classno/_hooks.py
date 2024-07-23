@@ -2,6 +2,7 @@ import typing as t
 
 from classno import _casting
 from classno import _fields
+from classno import _getattrs
 from classno import _setattrs
 from classno import _validation
 from classno import constants as c
@@ -70,9 +71,10 @@ def process_cls_features(cls: t.Type) -> None:
     if c.Features.SLOTS in features:
         cls.__slots__ = tuple(f.name for f in fields.values())
     if c.Features.FROZEN in features:
-        cls.__setattr__ = cls.__delattr__ = _setattrs.raise_frozen_attr_exc
+        cls.__setattr__ = cls.__delattr__ = _setattrs.frozen_setattr
     if c.Features.PRIVATE in features:
         cls.__setattr__ = _setattrs.privates_setattr
+        cls.__getattr__ = _getattrs.privates_getattr
     if c.Features.VALIDATION in features:
         cls.__setattr__ = _setattrs.validated_setattr
     if c.Features.LOSSY_AUTOCAST in features:

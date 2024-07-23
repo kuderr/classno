@@ -48,7 +48,7 @@ def lossy_autocast_setattr(self, name: str, value: t.Any) -> None:
     return super(self.__class__, self).__setattr__(name, casted_value)
 
 
-def raise_frozen_attr_exc(self, *args, **kwargs):
+def frozen_setattr(self, *args, **kwargs):
     raise Exception(f"Cannot modify attrs of class {self.__class__.__name__}")
 
 
