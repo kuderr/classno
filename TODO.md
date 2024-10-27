@@ -8,3 +8,8 @@ Features:
 - cast callback on fields?
 - setattrs builder
 - process features if methods already set
+
+Bugs:
+
+- cast/validation recursion
+- `__init__` ?
