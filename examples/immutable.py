@@ -1,5 +1,7 @@
-from netsome import types as nst
 import random
+
+from netsome import types as nst
+
 import classno
 
 

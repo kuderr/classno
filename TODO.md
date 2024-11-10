@@ -12,4 +12,3 @@ Features:
 Bugs:
 
 - cast/validation recursion
-- `__init__` ?

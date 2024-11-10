@@ -1,5 +1,7 @@
-from netsome import types as nst
 import random
+
+from netsome import types as nst
+
 import classno
 
 
@@ -15,4 +17,4 @@ class SubClassno(classno.Classno):
     d: list[str] = ["Foo", "Bar"]
 
 
-t = SubClassno()
+t = SubClassno(a=2)

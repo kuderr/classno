@@ -36,6 +36,8 @@ class Classno(metaclass=MetaClassno):
     __process_cls_features_hook__ = _hooks.process_cls_features
     __process_obj_features_hook__ = _hooks.process_obj_features
 
+    def __init__(self, *args, **kwargs) -> None: ...
+
     def as_dict(self):
         return {f.name: getattr(self, f.name) for f in self.__fields__.values()}
 

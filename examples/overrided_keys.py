@@ -1,5 +1,7 @@
-from netsome import types as nst
 import random
+
+from netsome import types as nst
+
 import classno
 
 
@@ -9,7 +11,6 @@ def random_ipv4():
 
 
 class SubClassno(classno.Classno):
-
     __hash_keys__ = {"a"}
     __eq_keys__ = {"a", "b"}
     __order_keys__ = {"b", "c", "d"}

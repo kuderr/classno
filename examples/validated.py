@@ -1,5 +1,7 @@
-from netsome import types as nst
 import random
+
+from netsome import types as nst
+
 import classno
 
 
@@ -9,7 +11,6 @@ def random_ipv4():
 
 
 class SubClassno(classno.Classno):
-
     __features__ = classno.Features.DEFAULT | classno.Features.VALIDATION
 
     a: int = 1
