@@ -11,7 +11,8 @@ def private_validated_setattr(self, name: str, value: t.Any) -> None:
     if name.startswith("_") and name[1:] not in self.__fields__:
         raise Exception(f"Attr {name} not found")
 
-    field = self.__fields__[name[1:]]
+    real_name = name[1:]
+    field = self.__fields__[real_name]
     try:
         _validation.validate_value_hint(value, field.hint)
     except TypeError:
@@ -20,7 +21,7 @@ def private_validated_setattr(self, name: str, value: t.Any) -> None:
             f"got {value} of type {type(value)}"
         )
 
-    return super(self.__class__, self).__setattr__(name, value)
+    return object.__setattr__(self, real_name, value)
 
 
 def validated_setattr(self, name: str, value: t.Any) -> None:
@@ -36,7 +37,7 @@ def validated_setattr(self, name: str, value: t.Any) -> None:
             f"got {value} of type {type(value)}"
         )
 
-    return super(self.__class__, self).__setattr__(name, value)
+    return object.__setattr__(self, name, value)
 
 
 def lossy_autocast_setattr(self, name: str, value: t.Any) -> None:
@@ -45,7 +46,7 @@ def lossy_autocast_setattr(self, name: str, value: t.Any) -> None:
 
     field = self.__fields__[name]
     casted_value = _casting.cast_value(value, field.hint)
-    return super(self.__class__, self).__setattr__(name, casted_value)
+    return object.__setattr__(self, name, casted_value)
 
 
 def frozen_setattr(self, *args, **kwargs):
@@ -56,7 +57,7 @@ def privates_setattr(self, name: str, value: t.Any) -> None:
     if name in self.__fields__:
         raise Exception("privates only")
 
-    if name.startswith("_") and name[1:] in self.__fields__:
-        return super(self.__class__, self).__setattr__(name[1:], value)
+    if name.startswith("_") and name[1:] not in self.__fields__:
+        raise Exception(f"Attr {name} not found")
 
-    return super(self.__class__, self).__setattr__(name, value)
+    return object.__setattr__(self, name[1:], value)

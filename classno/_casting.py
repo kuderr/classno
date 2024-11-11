@@ -9,7 +9,7 @@ def cast_fields(obj):
     for field in fields.values():
         attr = getattr(obj, field.name)
         attr = cast_value(attr, field.hint)
-        setattr(obj, field.name, attr)
+        object.__setattr__(obj, field.name, attr)
 
 
 def cast_dict(value, hint):
