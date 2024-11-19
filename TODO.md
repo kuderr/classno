@@ -8,6 +8,7 @@ Features:
 - cast callback on fields?
 - setattrs builder
 - raise validation/cast error with ALL errors
+- types for attrs
 
 Bugs:
 
