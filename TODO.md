@@ -15,5 +15,4 @@ Bugs:
 - process features if methods already set
   - processed features/methods override
 - Classno class set None for other classses and features that sets like `Features.ORDER not in features` doesnt work
-- set empty `__call__` method in Classno for types to shadow metaclass `__call_`
 - \_hash|\_eq|\_order_value conflicts with private get_attr

@@ -38,6 +38,9 @@ class Classno(metaclass=MetaClassno):
 
     def __init__(self, *args, **kwargs) -> None: ...
 
+    def __call__(self, *args, **kwargs) -> None:
+        raise TypeError(f"'{self.__class__.__name__}' object is not callable")
+
     def as_dict(self):
         return {f.name: getattr(self, f.name) for f in self.__fields__.values()}
 

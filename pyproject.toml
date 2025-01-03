@@ -8,6 +8,7 @@ DIRS = "classno tests examples"
 [tool.poe.tasks.lint]
 default_item_type = "cmd"
 sequence = [
+  "poetry run basedpyright",
   "poetry run ruff check --no-fix $DIRS",
   "poetry run toml-sort --check pyproject.toml"
 ]
@@ -50,3 +51,13 @@ toml-sort = "^0.23.1"
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kuderr/classno/issues"
 "Homepage" = "https://github.com/kuderr/classno"
+
+[tool.pyright]
+exclude = [".venv", "dist", "tests"]
+reportAny = false
+reportImplicitOverride = false
+reportMissingSuperCall = false
+typeCheckingMode = 'off'
+
+[tool.pytest.ini_options]
+addopts = "-ra --log-level=DEBUG --showlocals --verbose"
