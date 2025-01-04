@@ -1,6 +1,7 @@
 import typing as t
 
 from classno import _casting
+from classno import _dunders
 from classno import _fields
 from classno import _getattrs
 from classno import _setattrs
@@ -47,40 +48,34 @@ def set_fields(cls: t.Type) -> None:
     cls.__fields__ = fields
 
 
-def set_keys(cls: t.Type) -> None:
-    for cls_keys_attr in tuple(c._CLASSNO_KEYS_ATTRS):
-        attr = getattr(cls, cls_keys_attr)
-        if not attr:
-            attr = tuple(cls.__fields__)
-        setattr(cls, cls_keys_attr, attr)
+def set_keys(cls: t.Type, keys_attr: str) -> None:
+    attr = getattr(cls, keys_attr)
+    if not attr:
+        attr = tuple(cls.__fields__)
+        setattr(cls, keys_attr, attr)
 
 
 def process_cls_features(cls: t.Type) -> None:
     fields = cls.__fields__
     features = cls.__features__
-    # Get Classno from MRO by class name
-    base = next((c for c in cls.__mro__ if c.__name__ == "Classno"), None)
-    if base is None:
-        raise TypeError("Classno class not found in MRO")
 
+    # TODO: dont override
+    if c.Features.REPR in features:
+        cls.__repr__ = _dunders.__repr__
     # TODO: raise error if not set and keys set
-    if c.Features.EQ not in features:
-        cls._eq_value = None
-        print(cls, cls.__eq__, base.__eq__)
-        if cls.__eq__ == base.__eq__:
-            cls.__eq__ = None
-            delattr(cls, "__eq__")
-        print(cls, cls.__eq__, base.__eq__)
-
-    if c.Features.HASH not in features:
-        cls._hash_value = None
-        if cls.__hash__ == base.__hash__:
-            cls.__hash__ = None
-    if c.Features.ORDER not in features:
-        cls._order_value = None
-        for method in (cls.__lt__, cls.__le__, cls.__gt__, cls.__ge__):
-            if getattr(base, method.__name__):
-                setattr(cls, method.__name__, None)
+    if c.Features.EQ in features:
+        cls.__eq__ = _dunders.__eq__
+        cls._eq_value = _dunders._eq_value
+        set_keys(cls, c._CLASSNO_EQ_KEYS_ATTR)
+    if c.Features.HASH in features:
+        cls.__hash__ = _dunders.__hash__
+        cls._hash_value = _dunders._hash_value
+        set_keys(cls, c._CLASSNO_HASH_KEYS_ATTR)
+    if c.Features.ORDER in features:
+        cls._order_value = _dunders._order_value
+        for method in _dunders._ORDER_DUNDERS:
+            setattr(cls, method.__name__, method)
+        set_keys(cls, c._CLASSNO_ORDER_KEYS_ATTR)
 
     # TODO: raise if set
     if c.Features.SLOTS in features:
