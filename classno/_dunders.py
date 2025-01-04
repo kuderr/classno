@@ -55,6 +55,3 @@ def _cmp_factory(
     other_key = getattr(self, key)()
 
     return op(self_key, other_key)
-
-
-_ORDER_DUNDERS = {__lt__, __le__, __gt__, __ge__}

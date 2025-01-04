@@ -12,11 +12,15 @@ class MetaClassno(type):
         klass.__process_cls_features_hook__(klass)
         return klass
 
+    # Called on SubClassno(...)
     def __call__(cls, *args, **kwargs):
-        # Called on SubClassno(...)
+        # def __init__ is called here
         obj = type.__call__(cls, *args, **kwargs)
+        # Process object fields data and __init__ input
         cls.__init_hook__(obj, *args, **kwargs)
+
         cls.__process_obj_features_hook__(obj)
+        obj.__post__init__(*args, **kwargs)
         return obj
 
 
@@ -34,9 +38,7 @@ class Classno(metaclass=MetaClassno):
     __process_obj_features_hook__ = _hooks.process_obj_features
 
     def __init__(self, *args, **kwargs) -> None: ...
-
-    def __call__(self, *args, **kwargs) -> None:
-        raise TypeError(f"'{self.__class__.__name__}' object is not callable")
+    def __post__init__(self, *args, **kwargs) -> None: ...
 
     def as_dict(self):
         return {f.name: getattr(self, f.name) for f in self.__fields__.values()}

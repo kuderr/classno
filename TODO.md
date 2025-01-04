@@ -9,9 +9,3 @@ Features:
 - setattrs builder
 - raise validation/cast error with ALL errors
 - types for attrs
-
-Bugs:
-
-- process features if methods already set
-  - processed features/methods override
-- \_hash|\_eq|\_order_value conflicts with private get_attr

@@ -1,11 +1,7 @@
 import typing as t
 
-from classno import _casting
-from classno import _dunders
+from classno import _feature_handlers
 from classno import _fields
-from classno import _getattrs
-from classno import _setattrs
-from classno import _validation
 from classno import constants as c
 
 
@@ -48,58 +44,12 @@ def set_fields(cls: t.Type) -> None:
     cls.__fields__ = fields
 
 
-def set_keys(cls: t.Type, keys_attr: str) -> None:
-    attr = getattr(cls, keys_attr)
-    if not attr:
-        attr = tuple(cls.__fields__)
-        setattr(cls, keys_attr, attr)
-
-
 def process_cls_features(cls: t.Type) -> None:
-    fields = cls.__fields__
-    features = cls.__features__
-
-    # TODO: dont override
-    if c.Features.REPR in features:
-        cls.__repr__ = _dunders.__repr__
-    # TODO: raise error if not set and keys set
-    if c.Features.EQ in features:
-        cls.__eq__ = _dunders.__eq__
-        cls._eq_value = _dunders._eq_value
-        set_keys(cls, c._CLASSNO_EQ_KEYS_ATTR)
-    if c.Features.HASH in features:
-        cls.__hash__ = _dunders.__hash__
-        cls._hash_value = _dunders._hash_value
-        set_keys(cls, c._CLASSNO_HASH_KEYS_ATTR)
-    if c.Features.ORDER in features:
-        cls._order_value = _dunders._order_value
-        for method in _dunders._ORDER_DUNDERS:
-            setattr(cls, method.__name__, method)
-        set_keys(cls, c._CLASSNO_ORDER_KEYS_ATTR)
-
-    # TODO: raise if set
-    if c.Features.SLOTS in features:
-        cls.__slots__ = tuple(f.name for f in fields.values())
-    if c.Features.FROZEN in features:
-        cls.__setattr__ = cls.__delattr__ = _setattrs.frozen_setattr
-    if c.Features.PRIVATE in features:
-        cls.__setattr__ = _setattrs.privates_setattr
-        cls.__getattr__ = _getattrs.privates_getattr
-    if c.Features.VALIDATION in features:
-        cls.__setattr__ = _setattrs.validated_setattr
-    if c.Features.LOSSY_AUTOCAST in features:
-        cls.__setattr__ = _setattrs.lossy_autocast_setattr
-
-    # TODO(kuderr): make it prettier
-    if c.Features.VALIDATION | c.Features.PRIVATE in features:
-        cls.__setattr__ = _setattrs.private_validated_setattr
+    for feature in cls.__features__:
+        _feature_handlers._CLASS_HANDLERS_MAP[feature](cls)
 
 
 def process_obj_features(obj: object) -> None:
-    features = obj.__features__
-
-    # TODO: should it work together? if yes – in what order?
-    if c.Features.VALIDATION in features:
-        _validation.validate_fields(obj)
-    if c.Features.LOSSY_AUTOCAST in features:
-        _casting.cast_fields(obj)
+    for feature in obj.__features__:
+        if feature in _feature_handlers._OBJECT_HANDLERS_MAP:
+            _feature_handlers._OBJECT_HANDLERS_MAP[feature](obj)
