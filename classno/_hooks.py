@@ -58,14 +58,31 @@ def set_keys(cls: t.Type) -> None:
 def process_cls_features(cls: t.Type) -> None:
     fields = cls.__fields__
     features = cls.__features__
+    # Get Classno from MRO by class name
+    base = next((c for c in cls.__mro__ if c.__name__ == "Classno"), None)
+    if base is None:
+        raise TypeError("Classno class not found in MRO")
 
-    # TODO: process if all these methods already set in cls
+    # TODO: raise error if not set and keys set
     if c.Features.EQ not in features:
-        cls.__eq__ = cls._eq_value = None
-    if c.Features.ORDER not in features:
-        cls.__lt__ = cls.__le__ = cls.__gt__ = cls.__ge__ = cls._order_value = None
+        cls._eq_value = None
+        print(cls, cls.__eq__, base.__eq__)
+        if cls.__eq__ == base.__eq__:
+            cls.__eq__ = None
+            delattr(cls, "__eq__")
+        print(cls, cls.__eq__, base.__eq__)
+
     if c.Features.HASH not in features:
-        cls.__hash__ = cls._hash_value = None
+        cls._hash_value = None
+        if cls.__hash__ == base.__hash__:
+            cls.__hash__ = None
+    if c.Features.ORDER not in features:
+        cls._order_value = None
+        for method in (cls.__lt__, cls.__le__, cls.__gt__, cls.__ge__):
+            if getattr(base, method.__name__):
+                setattr(cls, method.__name__, None)
+
+    # TODO: raise if set
     if c.Features.SLOTS in features:
         cls.__slots__ = tuple(f.name for f in fields.values())
     if c.Features.FROZEN in features:
