@@ -65,6 +65,7 @@ def private_validation_handler(cls: t.Type) -> None:
     cls.__setattr__ = _setattrs.private_validated_setattr
 
 
+# FIXME: setattrs doesnt work properly, need to code setattr builder
 _CLASS_HANDLERS_MAP: dict[c.Features, t.Callable[[t.Type], None]] = {
     # TODO: dont override
     c.Features.REPR: repr_handler,
