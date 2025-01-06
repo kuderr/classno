@@ -1,10 +1,7 @@
 import typing as t
 
-from classno import _casting
+from classno import _feature_handlers
 from classno import _fields
-from classno import _getattrs
-from classno import _setattrs
-from classno import _validation
 from classno import constants as c
 
 
@@ -47,47 +44,12 @@ def set_fields(cls: t.Type) -> None:
     cls.__fields__ = fields
 
 
-def set_keys(cls: t.Type) -> None:
-    for cls_keys_attr in tuple(c._CLASSNO_KEYS_ATTRS):
-        attr = getattr(cls, cls_keys_attr)
-        if not attr:
-            attr = tuple(cls.__fields__)
-        setattr(cls, cls_keys_attr, attr)
-
-
 def process_cls_features(cls: t.Type) -> None:
-    fields = cls.__fields__
-    features = cls.__features__
-
-    # TODO: process if all these methods already set in cls
-    if c.Features.EQ not in features:
-        cls.__eq__ = cls._eq_value = None
-    if c.Features.ORDER not in features:
-        cls.__lt__ = cls.__le__ = cls.__gt__ = cls.__ge__ = cls._order_value = None
-    if c.Features.HASH not in features:
-        cls.__hash__ = cls._hash_value = None
-    if c.Features.SLOTS in features:
-        cls.__slots__ = tuple(f.name for f in fields.values())
-    if c.Features.FROZEN in features:
-        cls.__setattr__ = cls.__delattr__ = _setattrs.frozen_setattr
-    if c.Features.PRIVATE in features:
-        cls.__setattr__ = _setattrs.privates_setattr
-        cls.__getattr__ = _getattrs.privates_getattr
-    if c.Features.VALIDATION in features:
-        cls.__setattr__ = _setattrs.validated_setattr
-    if c.Features.LOSSY_AUTOCAST in features:
-        cls.__setattr__ = _setattrs.lossy_autocast_setattr
-
-    # TODO(kuderr): make it prettier
-    if c.Features.VALIDATION | c.Features.PRIVATE in features:
-        cls.__setattr__ = _setattrs.private_validated_setattr
+    for feature in cls.__features__:
+        _feature_handlers._CLASS_HANDLERS_MAP[feature](cls)
 
 
 def process_obj_features(obj: object) -> None:
-    features = obj.__features__
-
-    # TODO: should it work together? if yes – in what order?
-    if c.Features.VALIDATION in features:
-        _validation.validate_fields(obj)
-    if c.Features.LOSSY_AUTOCAST in features:
-        _casting.cast_fields(obj)
+    for feature in obj.__features__:
+        if feature in _feature_handlers._OBJECT_HANDLERS_MAP:
+            _feature_handlers._OBJECT_HANDLERS_MAP[feature](obj)
