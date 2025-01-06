@@ -1,20 +1,24 @@
 import contextlib
 import types
 import typing as t
+from classno import exceptions as excs
 
 
 def validate_fields(obj):
     fields = obj.__fields__
+    errors = []
 
     for field in fields.values():
         attr = getattr(obj, field.name)
         try:
             validate_value_hint(attr, field.hint)
         except TypeError:
-            raise TypeError(
-                f"For field {field.name} expected type of {field.hint}, "
-                f"got {attr} of type {type(attr)}"
+            errors.append(
+                f"For field {field.name}, expected {field.hint} but got {attr!r} of type {type(attr).__name__}"
             )
+
+    if errors:
+        raise excs.ValidationError(errors)
 
 
 def validate_dict(value, hint):
