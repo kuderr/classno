@@ -52,15 +52,12 @@ def private_handler(cls: t.Type) -> None:
     cls.__getattr__ = _getattrs.privates_getattr
 
 
-# FIXME: setattrs doesnt work properly, need to code setattr builder
 _CLASS_HANDLERS_MAP: dict[c.Features, t.Callable[[t.Type], None]] = {
-    # TODO: dont override
+    # TODO: dont override all of this if set by user
     c.Features.REPR: repr_handler,
-    # TODO: raise error if not set and keys set
     c.Features.EQ: eq_handler,
     c.Features.HASH: hash_handler,
     c.Features.ORDER: order_handler,
-    # TODO: raise if set
     c.Features.SLOTS: slots_handler,
     c.Features.FROZEN: frozen_handler,
     c.Features.PRIVATE: private_handler,
@@ -75,8 +72,9 @@ def lossy_autocast_obj_handler(obj: object) -> None:
     _casting.cast_fields(obj)
 
 
+# NOTE(kuderr): order is important here
 _OBJECT_HANDLERS_MAP: dict[c.Features, t.Callable[[object], None]] = {
     # TODO: should this two work together? if yes – in what order?
-    c.Features.VALIDATION: validation_obj_handler,
     c.Features.LOSSY_AUTOCAST: lossy_autocast_obj_handler,
+    c.Features.VALIDATION: validation_obj_handler,
 }

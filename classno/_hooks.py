@@ -46,14 +46,15 @@ def set_fields(cls: t.Type) -> None:
 
 
 def process_cls_features(cls: t.Type) -> None:
-    for feature in cls.__features__:
-        if feature in _feature_handlers._CLASS_HANDLERS_MAP:
+    for feature in _feature_handlers._CLASS_HANDLERS_MAP:
+        if feature in cls.__features__:
             _feature_handlers._CLASS_HANDLERS_MAP[feature](cls)
 
     cls.__setattr__ = _setattrs.setattr_processor
 
 
+# NOTE(kuderr): it could be set just into __setattr__ logic?
 def process_obj_features(obj: object) -> None:
-    for feature in obj.__features__:
-        if feature in _feature_handlers._OBJECT_HANDLERS_MAP:
+    for feature in _feature_handlers._OBJECT_HANDLERS_MAP:
+        if feature in obj.__features__:
             _feature_handlers._OBJECT_HANDLERS_MAP[feature](obj)
