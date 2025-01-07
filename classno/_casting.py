@@ -1,6 +1,7 @@
 import contextlib
 import types
 import typing as t
+
 from classno import exceptions as excs
 
 
@@ -15,7 +16,8 @@ def cast_fields(obj):
             object.__setattr__(obj, field.name, attr)
         except TypeError:
             errors.append(
-                f"For field {field.name}, failed to cast value {attr!r} of type {type(attr).__name__} to {field.hint}"
+                f"For field {field.name}, failed to cast value {attr!r} "
+                + f"of type {type(attr)} to {field.hint}"
             )
 
     if errors:

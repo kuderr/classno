@@ -1,6 +1,7 @@
 import contextlib
 import types
 import typing as t
+
 from classno import exceptions as excs
 
 
@@ -14,7 +15,8 @@ def validate_fields(obj):
             validate_value_hint(attr, field.hint)
         except TypeError:
             errors.append(
-                f"For field {field.name}, expected {field.hint} but got {attr!r} of type {type(attr).__name__}"
+                f"For field {field.name}, expected {field.hint} "
+                + f"but got {attr!r} of type {type(attr)}"
             )
 
     if errors:

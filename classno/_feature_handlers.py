@@ -1,9 +1,9 @@
 import typing as t
 
 from classno import _casting
+from classno import _delattrs
 from classno import _dunders
 from classno import _getattrs
-from classno import _setattrs
 from classno import _validation
 from classno import constants as c
 
@@ -45,24 +45,11 @@ def slots_handler(cls: t.Type) -> None:
 
 
 def frozen_handler(cls: t.Type) -> None:
-    cls.__setattr__ = cls.__delattr__ = _setattrs.frozen_setattr
+    cls.__delattr__ = _delattrs.frozen_delattr
 
 
 def private_handler(cls: t.Type) -> None:
-    cls.__setattr__ = _setattrs.privates_setattr
     cls.__getattr__ = _getattrs.privates_getattr
-
-
-def validation_handler(cls: t.Type) -> None:
-    cls.__setattr__ = _setattrs.validated_setattr
-
-
-def lossy_autocast_handler(cls: t.Type) -> None:
-    cls.__setattr__ = _setattrs.lossy_autocast_setattr
-
-
-def private_validation_handler(cls: t.Type) -> None:
-    cls.__setattr__ = _setattrs.private_validated_setattr
 
 
 # FIXME: setattrs doesnt work properly, need to code setattr builder
@@ -77,10 +64,6 @@ _CLASS_HANDLERS_MAP: dict[c.Features, t.Callable[[t.Type], None]] = {
     c.Features.SLOTS: slots_handler,
     c.Features.FROZEN: frozen_handler,
     c.Features.PRIVATE: private_handler,
-    c.Features.VALIDATION: validation_handler,
-    c.Features.LOSSY_AUTOCAST: lossy_autocast_handler,
-    # TODO: make set/getattrs builder?
-    c.Features.PRIVATE | c.Features.VALIDATION: private_validation_handler,
 }
 
 

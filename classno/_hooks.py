@@ -2,6 +2,7 @@ import typing as t
 
 from classno import _feature_handlers
 from classno import _fields
+from classno import _setattrs
 from classno import constants as c
 
 
@@ -46,7 +47,10 @@ def set_fields(cls: t.Type) -> None:
 
 def process_cls_features(cls: t.Type) -> None:
     for feature in cls.__features__:
-        _feature_handlers._CLASS_HANDLERS_MAP[feature](cls)
+        if feature in _feature_handlers._CLASS_HANDLERS_MAP:
+            _feature_handlers._CLASS_HANDLERS_MAP[feature](cls)
+
+    cls.__setattr__ = _setattrs.setattr_processor
 
 
 def process_obj_features(obj: object) -> None:
