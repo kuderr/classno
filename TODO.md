@@ -5,12 +5,11 @@ Features:
 - set cached properties if immutable ?
 - validate callback on fields?
 - cast callback on fields?
+- **reduce**
+- **copy**/**deepcopy**
 
 Bugs:
 
-- set \_eq/\_hash/\_order_value
 - validation fail if set field
-- add MISSING to export
 - add field init:bool?
-- copy/deepcopy
 - repr recurssion problem

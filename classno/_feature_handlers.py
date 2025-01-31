@@ -22,12 +22,14 @@ def repr_handler(cls: t.Type) -> None:
 
 def eq_handler(cls: t.Type) -> None:
     cls.__eq__ = _dunders.__eq__
+    cls._eq_value = _dunders._eq_value
     cls._cmp_factory = _dunders._cmp_factory
     set_keys(cls, c._CLASSNO_EQ_KEYS_ATTR)
 
 
 def hash_handler(cls: t.Type) -> None:
     cls.__hash__ = _dunders.__hash__
+    cls._hash_value = _dunders._hash_value
     set_keys(cls, c._CLASSNO_HASH_KEYS_ATTR)
 
 
@@ -36,6 +38,7 @@ def order_handler(cls: t.Type) -> None:
     cls.__le__ = _dunders.__le__
     cls.__gt__ = _dunders.__gt__
     cls.__ge__ = _dunders.__ge__
+    cls._order_value = _dunders._order_value
     cls._cmp_factory = _dunders._cmp_factory
     set_keys(cls, c._CLASSNO_ORDER_KEYS_ATTR)
 

@@ -1,4 +1,6 @@
 import typing as t
+import copy
+import functools
 
 from classno import _fields
 from classno import _hooks
@@ -45,3 +47,16 @@ class Classno(metaclass=MetaClassno):
 
     def as_kwargs(self):
         return ", ".join(f"{k!s}={v!r}" for k, v in self.as_dict().items())
+
+    # def __copy__(self):
+    #     new_instance = type(self)(**self.as_dict())
+    #     return new_instance
+
+    # def __deepcopy__(self, memo):
+    #     new_instance = type(self)(
+    #         **{k: copy.deepcopy(v, memo) for k, v in self.as_dict().items()}
+    #     )
+    #     return new_instance
+
+    # def __reduce__(self) -> tuple[t.Any, ...]:
+    #     return functools.partial(self.__class__, **self.as_dict()), tuple()
