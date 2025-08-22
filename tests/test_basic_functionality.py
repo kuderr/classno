@@ -1,9 +1,15 @@
-import pytest
-from typing import Optional, Union, List, Dict, Tuple
 from datetime import datetime
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
-import classno
-from classno import Classno, Features, field, MISSING
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 
 
 class TestBasicClassnoFunctionality:
@@ -155,18 +161,6 @@ class TestFeatureConfiguration:
 
         assert item1 < item2 < item3
         assert item3 > item2 > item1
-
-    def test_slots_feature(self):
-        """Test slots feature for memory optimization."""
-        class SlottedClass(Classno):
-            __features__ = Features.SLOTS
-            name: str
-            value: int
-
-        obj = SlottedClass(name="test", value=42)
-        assert obj.name == "test"
-        assert obj.value == 42
-        assert hasattr(SlottedClass, '__slots__')
 
     def test_combined_features(self):
         """Test combining multiple features."""

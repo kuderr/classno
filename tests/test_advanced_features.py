@@ -1,7 +1,12 @@
-import pytest
-from typing import List, Dict, Optional
+from typing import Dict
+from typing import List
+from typing import Optional
 
-from classno import Classno, Features, field
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 from classno.exceptions import ValidationError
 
 

@@ -1,7 +1,8 @@
 import pytest
 
-import classno
-from classno import Classno, Features, field
+from classno import Classno
+from classno import Features
+from classno import field
 
 
 class TestImmutableAndFrozen:

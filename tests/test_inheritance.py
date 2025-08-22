@@ -1,9 +1,11 @@
-import pytest
 from typing import Optional
 
-import classno
-from classno import Classno, Features, field
+import pytest
+
+from classno import Classno
+from classno import Features
 from classno import exceptions as excs
+from classno import field
 
 
 class TestInheritance:
@@ -362,7 +364,7 @@ class TestInheritance:
         assert employee.manager.employee_id == 1001
 
         # Should validate inherited fields
-        with pytest.raises(TypeError):
+        with pytest.raises(excs.ValidationError):
             Employee(name=123, age=30, employee_id=1003, department="IT")
 
     def test_inheritance_method_resolution_order(self):

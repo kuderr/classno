@@ -1,9 +1,12 @@
-import pytest
-from typing import Optional, Union
 from datetime import datetime
+from typing import Optional
+from typing import Union
 
-import classno
-from classno import Classno, Features, field
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 from classno.exceptions import ValidationError
 
 

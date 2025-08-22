@@ -27,18 +27,32 @@ def init_obj(self, *args, **kwargs):
 
 
 def set_fields(cls: t.Type) -> None:
+    # Collect annotations from all classes in the MRO
+    all_annotations = {}
+    for base in reversed(cls.__mro__):
+        if hasattr(base, '__annotations__'):
+            all_annotations.update(base.__annotations__)
+
     try:
         hints = t.get_type_hints(cls)
     except (NameError, AttributeError):
         # Fall back to using raw annotations if forward references fail
-        hints = getattr(cls, '__annotations__', {})
+        hints = all_annotations
 
     fields = {}
+    # Check for field defaults stored by the metaclass for slots compatibility
+    field_defaults = getattr(cls, '_field_defaults', {})
+
     for name, hint in hints.items():
         if name in c._CLASSNO_ATTRS:
             continue
 
-        attr = getattr(cls, name, c.MISSING)
+        # Check first in stored defaults, then in class attributes
+        if name in field_defaults:
+            attr = field_defaults[name]
+        else:
+            attr = getattr(cls, name, c.MISSING)
+
         f = attr if isinstance(attr, _fields.Field) else _fields.field(default=attr)
 
         f.name = name

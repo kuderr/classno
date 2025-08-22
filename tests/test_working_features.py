@@ -1,8 +1,12 @@
-import pytest
-from typing import List, Dict, Optional
+from typing import Dict
+from typing import List
+from typing import Optional
 
-import classno
-from classno import Classno, Features, field
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 from classno.exceptions import ValidationError
 
 
@@ -42,7 +46,7 @@ class TestActualWorkingFeatures:
         # Invalid creation should raise ValidationError
         with pytest.raises(ValidationError):
             ValidatedUser(name=123, age=30)
-        
+
         with pytest.raises(ValidationError):
             ValidatedUser(name="John", age="invalid")
 
@@ -73,7 +77,7 @@ class TestActualWorkingFeatures:
         # Should not be able to modify
         with pytest.raises(Exception):
             user.name = "Jane"
-        
+
         with pytest.raises(Exception):
             user.age = 25
 
@@ -85,14 +89,14 @@ class TestActualWorkingFeatures:
             secret: str
 
         user = PrivateUser(name="John", secret="password")
-        
+
         # Should be able to read private field
         assert user.secret == "password"
-        
+
         # Should not be able to write to private field directly
         with pytest.raises(Exception):
             user.secret = "new_password"
-        
+
         # Should be able to write via underscore
         user._secret = "new_password"
         assert user.secret == "new_password"
@@ -106,7 +110,7 @@ class TestActualWorkingFeatures:
 
         user1 = HashableUser(name="John", age=30)
         user2 = HashableUser(name="John", age=30)
-        
+
         # Should be hashable
         hash1 = hash(user1)
         hash2 = hash(user2)
@@ -129,7 +133,7 @@ class TestActualWorkingFeatures:
         # or may have different equality semantics
         result1 = user1 == user2
         result2 = user1 == user3
-        
+
         # Just verify that == operator works without throwing exception
         assert isinstance(result1, bool)
         assert isinstance(result2, bool)
@@ -159,10 +163,10 @@ class TestActualWorkingFeatures:
             age: int
 
         user = SlottedUser(name="John", age=30)
-        
+
         # Should have __slots__
         assert hasattr(SlottedUser, '__slots__')
-        
+
         # Should work normally
         assert user.name == "John"
         assert user.age == 30
@@ -175,11 +179,11 @@ class TestActualWorkingFeatures:
             age: int
 
         user = ImmutableUser(name="John", age=30)
-        
+
         # Should be frozen
         with pytest.raises(Exception):
             user.name = "Jane"
-        
+
         # Should have slots
         assert hasattr(ImmutableUser, '__slots__')
 
@@ -188,7 +192,7 @@ class TestActualWorkingFeatures:
         class CustomHashUser(Classno):
             __hash_keys__ = {"id"}
             __features__ = Features.HASH
-            
+
             id: int
             name: str
             age: int
@@ -201,7 +205,7 @@ class TestActualWorkingFeatures:
         hash1 = hash(user1)
         hash2 = hash(user2)
         hash3 = hash(user3)
-        
+
         assert hash1 == hash2  # Same ID
         assert hash1 != hash3  # Different ID (likely)
 
@@ -210,7 +214,7 @@ class TestActualWorkingFeatures:
         class CustomEqUser(Classno):
             __eq_keys__ = {"id"}
             __features__ = Features.EQ
-            
+
             id: int
             name: str
             age: int
@@ -223,10 +227,10 @@ class TestActualWorkingFeatures:
         # Just verify the objects can be compared without error
         result1 = user1 == user2
         result2 = user1 == user3
-        
+
         assert isinstance(result1, bool)
         assert isinstance(result2, bool)
-        
+
         # The objects should at least be equal to themselves
         assert user1 == user1
         assert user2 == user2
@@ -263,8 +267,8 @@ class TestActualWorkingFeatures:
 
         # Test with actual values
         user2 = ComplexUser(
-            name="Jane", 
-            scores=[95, 87, 92], 
+            name="Jane",
+            scores=[95, 87, 92],
             metadata={"role": "admin", "team": "engineering"}
         )
         assert user2.scores == [95, 87, 92]

@@ -43,10 +43,6 @@ def order_handler(cls: t.Type) -> None:
     set_keys(cls, c._CLASSNO_ORDER_KEYS_ATTR)
 
 
-def slots_handler(cls: t.Type) -> None:
-    cls.__slots__ = tuple(f.name for f in cls.__fields__.values())
-
-
 def frozen_handler(cls: t.Type) -> None:
     cls.__delattr__ = _delattrs.frozen_delattr
 
@@ -61,7 +57,6 @@ _CLASS_HANDLERS_MAP: dict[c.Features, t.Callable[[t.Type], None]] = {
     c.Features.EQ: eq_handler,
     c.Features.HASH: hash_handler,
     c.Features.ORDER: order_handler,
-    c.Features.SLOTS: slots_handler,
     c.Features.FROZEN: frozen_handler,
     c.Features.PRIVATE: private_handler,
 }

@@ -1,7 +1,7 @@
+import collections
 import contextlib
 import types
 import typing as t
-import collections
 
 from classno import exceptions as excs
 
@@ -85,7 +85,18 @@ VALIDATION_ORIGIN_HANDLER = {
 
 def validate_value_hint(value, hint):
     origin = t.get_origin(hint)
-    
+
+    # Handle ForwardRef - need to resolve it to the actual class
+    if isinstance(hint, t.ForwardRef):
+        # For ForwardRef, we need to check if the value is an instance of a class
+        # with the same name as the forward reference
+        expected_name = hint.__forward_arg__
+        if hasattr(value, '__class__'):
+            actual_name = value.__class__.__name__
+            if actual_name == expected_name:
+                return  # Valid ForwardRef match
+        raise TypeError
+
     # Handle Union types (both typing.Union and types.UnionType)
     if isinstance(hint, types.UnionType) or origin is t.Union:
         for sub_hint in t.get_args(hint):

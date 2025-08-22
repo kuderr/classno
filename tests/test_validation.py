@@ -1,8 +1,14 @@
-import pytest
-from typing import List, Dict, Tuple, Union, Optional
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
-import classno
-from classno import Classno, Features, field
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 from classno.exceptions import ValidationError
 
 
@@ -28,13 +34,13 @@ class TestValidationFeature:
         # Invalid types should raise ValidationError
         with pytest.raises(ValidationError):
             ValidatedModel(name=123, age=30, score=95.5, active=True)  # name should be str
-        
+
         with pytest.raises(ValidationError):
             ValidatedModel(name="John", age="30", score=95.5, active=True)  # age should be int
-        
+
         with pytest.raises(ValidationError):
             ValidatedModel(name="John", age=30, score="95.5", active=True)  # score should be float
-        
+
         with pytest.raises(ValidationError):
             ValidatedModel(name="John", age=30, score=95.5, active="yes")  # active should be bool
 
@@ -59,10 +65,10 @@ class TestValidationFeature:
         # Invalid list types
         with pytest.raises(ValidationError):
             ListModel(numbers="not a list", names=[], mixed=[])
-        
+
         with pytest.raises(ValidationError):
             ListModel(numbers=[1, "2", 3], names=[], mixed=[])  # "2" is not int
-        
+
         with pytest.raises(ValidationError):
             ListModel(numbers=[], names=[1, 2, 3], mixed=[])  # numbers in names
 
@@ -87,7 +93,7 @@ class TestValidationFeature:
         # Invalid dictionary types
         with pytest.raises(ValidationError):
             DictModel(str_to_int={1: "wrong"}, int_to_list={}, flexible={})  # key should be str
-        
+
         with pytest.raises(ValidationError):
             DictModel(str_to_int={"a": "wrong"}, int_to_list={}, flexible={})  # value should be int
 
@@ -112,7 +118,7 @@ class TestValidationFeature:
         # Invalid tuple types
         with pytest.raises(ValidationError):
             TupleModel(coordinates=("a", "b"), fixed_size=(1, "test", True), variable=(1, 2))
-        
+
         with pytest.raises(ValidationError):
             TupleModel(coordinates=(1.0, 2.0), fixed_size=(1, 2, 3), variable=(1, 2))  # wrong type in fixed_size
 
@@ -139,7 +145,7 @@ class TestValidationFeature:
         # Invalid types (not None and not the expected type)
         with pytest.raises(ValidationError):
             OptionalModel(name="John", age="invalid")
-        
+
         with pytest.raises(ValidationError):
             OptionalModel(name="John", email=123)
 
@@ -165,7 +171,7 @@ class TestValidationFeature:
         # Invalid union values
         with pytest.raises(ValidationError):
             UnionModel(value=[], number=10, complex_union=[1, 2, 3])  # list not in Union[int, str]
-        
+
         with pytest.raises(ValidationError):
             UnionModel(value=42, number="invalid", complex_union=[1, 2, 3])  # str not in Union[int, float]
 
@@ -197,7 +203,7 @@ class TestValidationFeature:
                 lookup={},
                 complex_structure={}
             )
-        
+
         with pytest.raises(ValidationError):
             NestedModel(
                 matrix=[[1, 2, 3]],

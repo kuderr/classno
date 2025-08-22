@@ -11,7 +11,28 @@ def __hash__(self) -> int:
 
 
 def _hash_value(self):
-    return tuple(getattr(self, k) for k in self.__hash_keys__)
+    def make_hashable(obj):
+        """Convert unhashable objects to hashable equivalents."""
+        if isinstance(obj, dict):
+            # For dict-like objects, convert values recursively
+            items = []
+            for key, value in obj.items():
+                items.append((key, make_hashable(value)))
+            return tuple(sorted(items))
+        elif isinstance(obj, (list, set)):
+            # For lists and sets, convert elements recursively
+            return tuple(make_hashable(item) for item in obj)
+        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes)):
+            try:
+                # For other iterables, try to convert elements recursively
+                return tuple(make_hashable(item) for item in obj)
+            except TypeError:
+                # If we can't iterate or convert to tuple, use string representation
+                return str(obj)
+        else:
+            return obj
+
+    return tuple(make_hashable(getattr(self, k)) for k in self.__hash_keys__)
 
 
 def __eq__(self, other: object) -> bool:

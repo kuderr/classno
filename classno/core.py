@@ -1,14 +1,66 @@
-import typing as t
 import copy
 import functools
+import typing as t
 
 from classno import _fields
 from classno import _hooks
 from classno import constants as c
 
 
+def _prepare_slots_for_class(attrs: dict, bases: tuple) -> dict:
+    """
+    Prepare slots configuration for a class during metaclass creation.
+    
+    Args:
+        attrs: Class attributes dictionary being processed by metaclass
+        bases: Base classes tuple
+        
+    Returns:
+        Modified attrs dictionary with slots and field defaults prepared
+    """
+    features = attrs.get('__features__', c.Features.DEFAULT)
+
+    # Check if any base class has slots feature enabled
+    parent_has_slots = any(
+        hasattr(base, '__features__') and c.Features.SLOTS in base.__features__
+        for base in bases
+        if hasattr(base, '__features__')
+    )
+
+    # Enable slots if current class or any parent has slots
+    if c.Features.SLOTS not in features and not parent_has_slots:
+        return attrs
+
+    # Get annotations from current class
+    annotations = attrs.get('__annotations__', {})
+
+    # Collect field names (excluding classno internal attributes)
+    field_names = []
+    # Store default values to move them out of attrs for slots compatibility
+    field_defaults = {}
+
+    for field_name in annotations:
+        if field_name not in c._CLASSNO_ATTRS:
+            field_names.append(field_name)
+            # If there's a default value, store it and remove from attrs
+            if field_name in attrs:
+                field_defaults[field_name] = attrs[field_name]
+                del attrs[field_name]
+
+    # Only set __slots__ if we have fields and it's not already set
+    if field_names and '__slots__' not in attrs:
+        attrs['__slots__'] = tuple(field_names)
+        # Store the field defaults for later use
+        attrs['_field_defaults'] = field_defaults
+
+    return attrs
+
+
 class MetaClassno(type):
     def __new__(cls, name, bases, attrs):
+        # Handle slots feature before class creation
+        attrs = _prepare_slots_for_class(attrs, bases)
+
         klass = super().__new__(cls, name, bases, attrs)
         klass.__set_fields_hook__(klass)
         klass.__process_cls_features_hook__(klass)
@@ -27,6 +79,9 @@ class MetaClassno(type):
 
 
 class Classno(metaclass=MetaClassno):
+    # Add empty __slots__ to prevent __dict__ in child classes that use slots
+    __slots__ = ()
+
     __fields__: t.ClassVar[dict[str, _fields.Field]] = {}
     __features__: t.ClassVar[c.Features] = c.Features.DEFAULT
 

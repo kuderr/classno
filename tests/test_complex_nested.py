@@ -1,9 +1,14 @@
-import pytest
-from typing import List, Dict, Tuple, Optional, Union
 from datetime import datetime
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
-import classno
-from classno import Classno, Features, field
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 from classno.exceptions import ValidationError
 
 
@@ -126,7 +131,7 @@ class TestComplexNestedStructures:
         # Should validate nested structures
         with pytest.raises(ValidationError):
             invalid_coord = Coordinate(x="invalid", y=20.3)
-        
+
         with pytest.raises(ValidationError):
             Route(name="test", waypoints=["invalid waypoint"], metadata={})
 
@@ -239,7 +244,7 @@ class TestComplexNestedStructures:
         # Verify immutability
         with pytest.raises(Exception):
             shape.name = "Changed"
-        
+
         with pytest.raises(Exception):
             shape.points[0].x = 5.0
 
@@ -256,7 +261,7 @@ class TestComplexNestedStructures:
 
         class Team(Classno):
             __eq_keys__ = {"name", "members"}
-            
+
             name: str
             members: List[PersonWithId]
 
@@ -306,7 +311,7 @@ class TestComplexNestedStructures:
         # Add configured database
         custom_settings = Settings(debug=True, max_connections=200, features=["caching", "logging"])
         app.databases["secondary"] = Database(host="remote", port=3306, settings=custom_settings)
-        
+
         assert app.databases["secondary"].host == "remote"
         assert app.databases["secondary"].settings.debug is True
         assert app.databases["secondary"].settings.features == ["caching", "logging"]

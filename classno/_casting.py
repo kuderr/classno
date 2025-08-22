@@ -1,7 +1,7 @@
+import collections
 import contextlib
 import types
 import typing as t
-import collections
 
 from classno import exceptions as excs
 
@@ -131,6 +131,6 @@ def cast_value(value, hint):
 
     if isinstance(value, hint):
         return value
-    
+
     # This should never be reached, but explicit is better than implicit
     raise TypeError(f"Unable to cast {value} of type {type(value)} to {hint}")

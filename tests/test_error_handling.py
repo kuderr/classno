@@ -1,8 +1,14 @@
-import pytest
-from typing import List, Dict, Optional, Union, Tuple
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
-import classno
-from classno import Classno, Features, field, MISSING
+import pytest
+
+from classno import Classno
+from classno import Features
+from classno import field
 from classno.exceptions import ValidationError
 
 
