@@ -1,5 +1,5 @@
 import pytest
-from typing import List, Dict, Optional, Union
+from typing import Optional, Union
 from datetime import datetime
 
 import classno
@@ -12,15 +12,16 @@ class TestComprehensiveScenarios:
 
     def test_real_world_user_model(self):
         """Test a realistic user model with various features."""
+
         class User(Classno):
             __features__ = Features.VALIDATION | Features.FROZEN
-            
+
             id: int
             username: str
             email: str
             is_active: bool = True
-            tags: List[str] = field(default_factory=list)
-            metadata: Dict[str, Union[str, int]] = field(default_factory=dict)
+            tags: list[str] = field(default_factory=list)
+            metadata: dict[str, Union[str, int]] = field(default_factory=dict)
             created_at: Optional[datetime] = None
 
         # Valid user creation
@@ -30,9 +31,9 @@ class TestComprehensiveScenarios:
             email="john@example.com",
             tags=["admin", "developer"],
             metadata={"department": "engineering", "level": 5},
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
-        
+
         assert user.id == 1
         assert user.username == "john_doe"
         assert user.is_active is True
@@ -49,6 +50,7 @@ class TestComprehensiveScenarios:
 
     def test_nested_business_model(self):
         """Test complex nested business model."""
+
         class Address(Classno):
             street: str
             city: str
@@ -57,45 +59,45 @@ class TestComprehensiveScenarios:
 
         class Company(Classno):
             __features__ = Features.VALIDATION
-            
+
             name: str
             address: Address
-            employees: List[str] = field(default_factory=list)
+            employees: list[str] = field(default_factory=list)
             founded_year: int
             is_public: bool = False
 
         class Employee(Classno):
             __features__ = Features.VALIDATION | Features.HASH
             __hash_keys__ = {"employee_id"}
-            
+
             employee_id: str
             full_name: str
             company: Company
             salary: Optional[int] = None
-            departments: List[str] = field(default_factory=list)
+            departments: list[str] = field(default_factory=list)
 
         # Create nested structure
         address = Address(
             street="123 Business Ave",
             city="San Francisco",
             state="CA",
-            zip_code="94101"
+            zip_code="94101",
         )
-        
+
         company = Company(
             name="Tech Corp",
             address=address,
             employees=["EMP001", "EMP002"],
             founded_year=2010,
-            is_public=True
+            is_public=True,
         )
-        
+
         employee = Employee(
             employee_id="EMP001",
             full_name="John Doe",
             company=company,
             salary=120000,
-            departments=["Engineering", "Research"]
+            departments=["Engineering", "Research"],
         )
 
         # Verify deep nesting works
@@ -110,9 +112,10 @@ class TestComprehensiveScenarios:
 
     def test_configuration_management(self):
         """Test configuration management scenario with defaults and validation."""
+
         class DatabaseConfig(Classno):
             __features__ = Features.VALIDATION | Features.FROZEN
-            
+
             host: str = "localhost"
             port: int = 5432
             database: str
@@ -124,26 +127,24 @@ class TestComprehensiveScenarios:
 
         class AppConfig(Classno):
             __features__ = Features.VALIDATION | Features.FROZEN
-            
+
             app_name: str
             debug: bool = False
             database: DatabaseConfig
-            allowed_hosts: List[str] = field(default_factory=list)
-            feature_flags: Dict[str, bool] = field(default_factory=dict)
+            allowed_hosts: list[str] = field(default_factory=list)
+            feature_flags: dict[str, bool] = field(default_factory=dict)
             log_level: str = "INFO"
 
         # Create configuration with some defaults
         db_config = DatabaseConfig(
-            database="myapp",
-            username="dbuser",
-            password="secret123"
+            database="myapp", username="dbuser", password="secret123"
         )
-        
+
         app_config = AppConfig(
             app_name="MyApplication",
             database=db_config,
             allowed_hosts=["localhost", "127.0.0.1"],
-            feature_flags={"new_ui": True, "beta_features": False}
+            feature_flags={"new_ui": True, "beta_features": False},
         )
 
         # Verify defaults are applied
@@ -156,16 +157,17 @@ class TestComprehensiveScenarios:
         # Should be frozen
         with pytest.raises(Exception):
             app_config.debug = True
-        
+
         with pytest.raises(Exception):
             app_config.database.host = "remote.db.com"
 
     def test_api_response_modeling(self):
         """Test API response modeling with optional fields and unions."""
+
         class ApiError(Classno):
             code: int
             message: str
-            details: Optional[Dict[str, str]] = None
+            details: Optional[dict[str, str]] = None
 
         class PaginationMeta(Classno):
             page: int
@@ -176,9 +178,9 @@ class TestComprehensiveScenarios:
 
         class ApiResponse(Classno):
             __features__ = Features.VALIDATION
-            
+
             success: bool
-            data: Optional[Union[Dict, List]] = None
+            data: Optional[Union[dict, list]] = None
             error: Optional[ApiError] = None
             meta: Optional[PaginationMeta] = None
             timestamp: float = field(default_factory=lambda: datetime.now().timestamp())
@@ -188,14 +190,10 @@ class TestComprehensiveScenarios:
             success=True,
             data={"users": [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]},
             meta=PaginationMeta(
-                page=1,
-                per_page=10,
-                total=25,
-                has_next=True,
-                has_prev=False
-            )
+                page=1, per_page=10, total=25, has_next=True, has_prev=False
+            ),
         )
-        
+
         assert success_response.success is True
         assert success_response.error is None
         assert success_response.meta.total == 25
@@ -207,10 +205,10 @@ class TestComprehensiveScenarios:
             error=ApiError(
                 code=404,
                 message="User not found",
-                details={"resource": "user", "id": "123"}
-            )
+                details={"resource": "user", "id": "123"},
+            ),
         )
-        
+
         assert error_response.success is False
         assert error_response.data is None
         assert error_response.error.code == 404
@@ -218,9 +216,10 @@ class TestComprehensiveScenarios:
 
     def test_autocasting_scenarios(self):
         """Test realistic autocasting scenarios."""
+
         class FlexibleData(Classno):
             __features__ = Features.LOSSY_AUTOCAST
-            
+
             id: str  # Should convert numbers to strings
             score: int  # Should truncate floats
             percentage: float  # Should convert integers
@@ -232,9 +231,9 @@ class TestComprehensiveScenarios:
             score=87.9,
             percentage=75,
             is_enabled=True,
-            tags={"python", "web", "api"}  # set to list
+            tags={"python", "web", "api"},  # set to list
         )
-        
+
         assert data.id == "12345"
         assert data.score == 87  # Truncated
         assert data.percentage == 75.0
@@ -244,6 +243,7 @@ class TestComprehensiveScenarios:
 
     def test_inheritance_with_mixins(self):
         """Test inheritance patterns with mixin-like functionality."""
+
         class TimestampMixin(Classno):
             created_at: Optional[datetime] = None
             updated_at: Optional[datetime] = None
@@ -260,7 +260,7 @@ class TestComprehensiveScenarios:
             title: str
             content: str
             published: bool = False
-            tags: List[str] = field(default_factory=list)
+            tags: list[str] = field(default_factory=list)
 
         # Create blog post with inherited fields
         post = BlogPost(
@@ -270,9 +270,9 @@ class TestComprehensiveScenarios:
             published=True,
             tags=["python", "programming"],
             created_at=datetime.now(),
-            created_by="author@example.com"
+            created_by="author@example.com",
         )
-        
+
         assert post.id == 1
         assert post.title == "My First Post"
         assert post.published is True
@@ -282,15 +282,16 @@ class TestComprehensiveScenarios:
 
     def test_complex_validation_scenarios(self):
         """Test complex validation scenarios."""
+
         class Product(Classno):
             __features__ = Features.VALIDATION
-            
+
             name: str
             price: float
-            categories: List[str]
-            specifications: Dict[str, Union[str, int, float]]
-            availability: Dict[str, int]  # region -> stock count
-            metadata: Dict[str, Optional[str]] = field(default_factory=dict)
+            categories: list[str]
+            specifications: dict[str, Union[str, int, float]]
+            availability: dict[str, int]  # region -> stock count
+            metadata: dict[str, Optional[str]] = field(default_factory=dict)
 
         # Valid product
         product = Product(
@@ -301,12 +302,12 @@ class TestComprehensiveScenarios:
                 "cpu": "Intel i7",
                 "ram": 16,
                 "storage": 512,
-                "weight": 2.5
+                "weight": 2.5,
             },
             availability={"US": 10, "EU": 5, "Asia": 0},
-            metadata={"warranty": "2 years", "brand": "TechBrand"}
+            metadata={"warranty": "2 years", "brand": "TechBrand"},
         )
-        
+
         assert product.name == "Laptop Computer"
         assert product.specifications["ram"] == 16
         assert product.availability["US"] == 10
@@ -318,17 +319,18 @@ class TestComprehensiveScenarios:
                 price=999.99,
                 categories=["electronics"],
                 specifications={},
-                availability={}
+                availability={},
             )
 
     def test_factory_defaults_complex(self):
         """Test complex factory default scenarios."""
+
         def create_default_settings():
             return {
                 "theme": "dark",
                 "language": "en",
                 "notifications": True,
-                "privacy": {"analytics": False, "cookies": True}
+                "privacy": {"analytics": False, "cookies": True},
             }
 
         def create_empty_stats():
@@ -336,30 +338,30 @@ class TestComprehensiveScenarios:
 
         class UserProfile(Classno):
             username: str
-            settings: Dict = field(default_factory=create_default_settings)
-            stats: Dict[str, int] = field(default_factory=create_empty_stats)
-            bookmarks: List[str] = field(default_factory=list)
+            settings: dict = field(default_factory=create_default_settings)
+            stats: dict[str, int] = field(default_factory=create_empty_stats)
+            bookmarks: list[str] = field(default_factory=list)
             created_at: datetime = field(default_factory=datetime.now)
 
         # Create multiple instances to test factory functions
         profile1 = UserProfile(username="user1")
         profile2 = UserProfile(username="user2")
-        
+
         # Should have independent default objects
         assert profile1.settings is not profile2.settings
         assert profile1.stats is not profile2.stats
         assert profile1.bookmarks is not profile2.bookmarks
-        
+
         # But should have same default values
         assert profile1.settings["theme"] == "dark"
         assert profile2.settings["theme"] == "dark"
         assert profile1.stats["views"] == 0
         assert profile2.stats["views"] == 0
-        
+
         # Modifications should be independent
         profile1.settings["theme"] = "light"
         profile1.stats["views"] = 100
-        
+
         assert profile1.settings["theme"] == "light"
         assert profile2.settings["theme"] == "dark"  # Unchanged
         assert profile1.stats["views"] == 100
@@ -367,14 +369,15 @@ class TestComprehensiveScenarios:
 
     def test_edge_case_empty_and_none(self):
         """Test edge cases with empty values and None."""
+
         class EdgeCaseModel(Classno):
             __features__ = Features.VALIDATION
-            
+
             required_string: str
             optional_string: Optional[str] = None
-            empty_list: List[str] = field(default_factory=list)
-            empty_dict: Dict[str, int] = field(default_factory=dict)
-            nullable_list: Optional[List[int]] = None
+            empty_list: list[str] = field(default_factory=list)
+            empty_dict: dict[str, int] = field(default_factory=dict)
+            nullable_list: Optional[list[int]] = None
 
         # Test with minimal values
         model = EdgeCaseModel(required_string="")
@@ -390,7 +393,7 @@ class TestComprehensiveScenarios:
             optional_string="optional",
             empty_list=["a", "b"],
             empty_dict={"key": 42},
-            nullable_list=[1, 2, 3]
+            nullable_list=[1, 2, 3],
         )
         assert model2.optional_string == "optional"
         assert model2.empty_list == ["a", "b"]
@@ -399,21 +402,22 @@ class TestComprehensiveScenarios:
 
     def test_performance_with_many_fields(self):
         """Test performance characteristics with many fields."""
+
         class ManyFieldsModel(Classno):
             # Create a model with many fields to test performance
             field_01: str = "default"
             field_02: int = 0
             field_03: float = 0.0
             field_04: bool = False
-            field_05: List[str] = field(default_factory=list)
-            field_06: Dict[str, int] = field(default_factory=dict)
+            field_05: list[str] = field(default_factory=list)
+            field_06: dict[str, int] = field(default_factory=dict)
             field_07: Optional[str] = None
             field_08: str = "default"
             field_09: int = 0
             field_10: float = 0.0
             field_11: bool = False
-            field_12: List[int] = field(default_factory=list)
-            field_13: Dict[str, str] = field(default_factory=dict)
+            field_12: list[int] = field(default_factory=list)
+            field_13: dict[str, str] = field(default_factory=dict)
             field_14: Optional[int] = None
             field_15: str = "default"
 

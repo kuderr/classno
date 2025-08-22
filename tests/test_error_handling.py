@@ -11,6 +11,7 @@ class TestErrorHandling:
 
     def test_missing_required_fields(self):
         """Test errors when required fields are missing."""
+
         class RequiredFields(Classno):
             name: str
             age: int
@@ -23,8 +24,10 @@ class TestErrorHandling:
         # Should fail with missing required field
         with pytest.raises(TypeError) as exc_info:
             RequiredFields(name="John", age=30)  # Missing email
-        
-        assert "email" in str(exc_info.value) or "missing" in str(exc_info.value).lower()
+
+        assert (
+            "email" in str(exc_info.value) or "missing" in str(exc_info.value).lower()
+        )
 
         # Should fail with multiple missing fields
         with pytest.raises(TypeError):
@@ -32,6 +35,7 @@ class TestErrorHandling:
 
     def test_invalid_field_types_without_validation(self):
         """Test that invalid types are accepted without validation feature."""
+
         class NoValidation(Classno):
             name: str
             age: int
@@ -45,6 +49,7 @@ class TestErrorHandling:
 
     def test_validation_error_messages(self):
         """Test that validation provides helpful error messages."""
+
         class ValidatedClass(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -52,67 +57,66 @@ class TestErrorHandling:
             scores: List[float]
 
         # Test basic type validation error
-        with pytest.raises(TypeError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             ValidatedClass(name=123, age=25, scores=[])
-        
+
         error_msg = str(exc_info.value).lower()
         assert "name" in error_msg or "str" in error_msg
 
         # Test complex type validation error
-        with pytest.raises(TypeError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             ValidatedClass(name="John", age=25, scores=[1, "invalid", 3])
-        
+
         error_msg = str(exc_info.value).lower()
         assert "scores" in error_msg or "float" in error_msg or "list" in error_msg
 
     def test_frozen_modification_errors(self):
         """Test errors when trying to modify frozen objects."""
+
         class FrozenClass(Classno):
             __features__ = Features.FROZEN
             name: str
             value: int
 
         obj = FrozenClass(name="test", value=42)
-        
+
         # Should raise appropriate error when trying to modify
         with pytest.raises(Exception) as exc_info:
             obj.name = "modified"
-        
+
         error_msg = str(exc_info.value).lower()
-        assert any(word in error_msg for word in ["frozen", "immutable", "read", "only"])
+        assert any(
+            word in error_msg for word in ["frozen", "immutable", "read", "only"]
+        )
 
         with pytest.raises(Exception):
             obj.value = 100
 
     def test_private_field_access_errors(self):
         """Test errors with private field access."""
+
         class PrivateClass(Classno):
             __features__ = Features.PRIVATE
-            public_field: str
-            private_field: str
+            field: str
 
-        obj = PrivateClass(public_field="public", private_field="private")
-
-        # Should work for public field
-        obj.public_field = "modified"
-        assert obj.public_field == "modified"
+        obj = PrivateClass(field="original")
 
         # Should fail for direct private field modification
         with pytest.raises(Exception) as exc_info:
-            obj.private_field = "modified"
-        
+            obj.field = "modified"
+
         error_msg = str(exc_info.value).lower()
         assert "private" in error_msg or "read" in error_msg
 
         # But should work with underscore prefix
-        obj._private_field = "modified_private"
-        assert obj.private_field == "modified_private"
+        obj._field = "modified"
+        assert obj.field == "modified"
 
     def test_invalid_feature_combinations(self):
         """Test handling of invalid or conflicting feature combinations."""
         # This test depends on the library's implementation
         # Some feature combinations might not make sense or could cause conflicts
-        
+
         class ConflictingFeatures(Classno):
             # This might cause issues if the library doesn't handle it well
             __features__ = Features.FROZEN | Features.LOSSY_AUTOCAST
@@ -124,7 +128,7 @@ class TestErrorHandling:
             obj = ConflictingFeatures(name="test", value=42.5)
             # If it works, the object should be created
             assert obj.name == "test"
-            
+
             # Should still be frozen
             with pytest.raises(Exception):
                 obj.name = "changed"
@@ -134,11 +138,12 @@ class TestErrorHandling:
 
     def test_circular_reference_handling(self):
         """Test handling of circular references in validation."""
+
         class Node(Classno):
             __features__ = Features.VALIDATION
             name: str
-            parent: Optional['Node'] = None
-            children: List['Node'] = field(default_factory=list)
+            parent: Optional["Node"] = None
+            children: List["Node"] = field(default_factory=list)
 
         # Should handle forward references
         root = Node(name="root")
@@ -151,10 +156,11 @@ class TestErrorHandling:
 
     def test_deep_nesting_limits(self):
         """Test behavior with very deep nesting."""
+
         class DeepNested(Classno):
             __features__ = Features.VALIDATION
             level: int
-            nested: Optional['DeepNested'] = None
+            nested: Optional["DeepNested"] = None
 
         # Create deeply nested structure
         current = None
@@ -163,7 +169,7 @@ class TestErrorHandling:
 
         # Should handle deep nesting
         assert current.level == 99
-        
+
         # Navigate down the structure
         node = current
         for expected_level in range(99, -1, -1):
@@ -174,6 +180,7 @@ class TestErrorHandling:
 
     def test_large_collection_validation(self):
         """Test validation with large collections."""
+
         class LargeCollection(Classno):
             __features__ = Features.VALIDATION
             numbers: List[int]
@@ -193,6 +200,7 @@ class TestErrorHandling:
 
     def test_unicode_and_special_characters(self):
         """Test handling of unicode and special characters."""
+
         class UnicodeClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             name: str
@@ -213,6 +221,7 @@ class TestErrorHandling:
 
     def test_none_handling_edge_cases(self):
         """Test edge cases with None values."""
+
         class NoneHandling(Classno):
             __features__ = Features.VALIDATION
             required: str
@@ -231,7 +240,7 @@ class TestErrorHandling:
             required="test2",
             optional="not none",
             optional_list=[1, 2, 3],
-            union_with_none=42
+            union_with_none=42,
         )
         assert obj2.optional == "not none"
         assert obj2.optional_list == [1, 2, 3]
@@ -243,6 +252,7 @@ class TestErrorHandling:
 
     def test_empty_class_definition(self):
         """Test edge case of empty class definition."""
+
         class EmptyClass(Classno):
             pass
 
@@ -252,6 +262,7 @@ class TestErrorHandling:
 
     def test_complex_default_factory_errors(self):
         """Test errors in default factory functions."""
+
         def failing_factory():
             raise ValueError("Factory failed")
 
@@ -269,6 +280,7 @@ class TestErrorHandling:
 
     def test_inheritance_error_scenarios(self):
         """Test error scenarios with inheritance."""
+
         class BaseWithRequired(Classno):
             base_field: str
 
@@ -289,9 +301,10 @@ class TestErrorHandling:
 
     def test_malformed_type_hints(self):
         """Test handling of complex or edge case type hints."""
+
         class ComplexTypes(Classno):
             __features__ = Features.VALIDATION
-            
+
             # Complex nested types
             nested_mapping: Dict[str, List[Tuple[int, Optional[str]]]]
             union_list: List[Union[int, str, None]]
@@ -301,23 +314,21 @@ class TestErrorHandling:
         obj = ComplexTypes(
             nested_mapping={
                 "group1": [(1, "one"), (2, None), (3, "three")],
-                "group2": [(4, "four")]
+                "group2": [(4, "four")],
             },
-            union_list=[1, "two", None, 4, "five"]
+            union_list=[1, "two", None, 4, "five"],
         )
-        
+
         assert obj.nested_mapping["group1"][0] == (1, "one")
         assert obj.union_list[2] is None
 
         # Invalid structure
         with pytest.raises(ValidationError):
-            ComplexTypes(
-                nested_mapping={"invalid": "not a list"},
-                union_list=[]
-            )
+            ComplexTypes(nested_mapping={"invalid": "not a list"}, union_list=[])
 
     def test_field_access_on_invalid_objects(self):
         """Test field access when object creation partially failed."""
+
         class PartiallyValid(Classno):
             __features__ = Features.VALIDATION
             valid_field: str

@@ -9,6 +9,7 @@ class TestImmutableAndFrozen:
 
     def test_frozen_basic(self):
         """Test basic frozen functionality."""
+
         class FrozenConfig(Classno):
             __features__ = Features.FROZEN
             host: str
@@ -21,12 +22,13 @@ class TestImmutableAndFrozen:
         # Should not be able to modify
         with pytest.raises(Exception):
             config.host = "changed"
-        
+
         with pytest.raises(Exception):
             config.port = 9000
 
     def test_immutable_combines_features(self):
         """Test that IMMUTABLE feature combines FROZEN, SLOTS, and HASH."""
+
         class ImmutableData(Classno):
             __features__ = Features.IMMUTABLE
             name: str
@@ -44,10 +46,11 @@ class TestImmutableAndFrozen:
         assert len(data_set) == 1  # Same hash
 
         # Should use slots
-        assert hasattr(ImmutableData, '__slots__')
+        assert hasattr(ImmutableData, "__slots__")
 
     def test_frozen_with_complex_types(self):
         """Test frozen objects with complex field types."""
+
         class FrozenComplex(Classno):
             __features__ = Features.FROZEN
             numbers: list[int] = field(default_factory=list)
@@ -59,7 +62,7 @@ class TestImmutableAndFrozen:
         # Object itself should be frozen
         with pytest.raises(Exception):
             obj.name = "changed"
-        
+
         with pytest.raises(Exception):
             obj.numbers = [4, 5, 6]
 
@@ -71,6 +74,7 @@ class TestImmutableAndFrozen:
 
     def test_nested_frozen_objects(self):
         """Test nested frozen objects."""
+
         class FrozenAddress(Classno):
             __features__ = Features.FROZEN
             street: str
@@ -87,12 +91,13 @@ class TestImmutableAndFrozen:
         # Neither object should be modifiable
         with pytest.raises(Exception):
             person.name = "Jane"
-        
+
         with pytest.raises(Exception):
             person.address.street = "456 Oak Ave"
 
     def test_frozen_with_validation(self):
         """Test frozen combined with validation."""
+
         class FrozenValidated(Classno):
             __features__ = Features.FROZEN | Features.VALIDATION
             name: str
@@ -107,7 +112,7 @@ class TestImmutableAndFrozen:
         # Should reject invalid types
         with pytest.raises(Exception):  # ValidationError or similar
             FrozenValidated(name=123, age=25)
-        
+
         with pytest.raises(Exception):  # ValidationError or similar
             FrozenValidated(name="test", age="invalid")
 
@@ -117,6 +122,7 @@ class TestImmutableAndFrozen:
 
     def test_frozen_inheritance(self):
         """Test frozen behavior with inheritance."""
+
         class BaseFrozen(Classno):
             __features__ = Features.FROZEN
             base_field: str
@@ -129,12 +135,13 @@ class TestImmutableAndFrozen:
         # Both inherited and new fields should be frozen
         with pytest.raises(Exception):
             obj.base_field = "changed"
-        
+
         with pytest.raises(Exception):
             obj.child_field = 99
 
     def test_frozen_with_optional_fields(self):
         """Test frozen objects with optional fields."""
+
         class FrozenOptional(Classno):
             __features__ = Features.FROZEN
             required: str
@@ -153,12 +160,13 @@ class TestImmutableAndFrozen:
         # Should be frozen regardless of None values
         with pytest.raises(Exception):
             obj1.optional = "changed"
-        
+
         with pytest.raises(Exception):
             obj2.default_value = 99
 
     def test_frozen_equality_and_hashing(self):
         """Test that frozen objects work correctly with equality and hashing."""
+
         class FrozenHashable(Classno):
             __features__ = Features.FROZEN | Features.HASH | Features.EQ
             name: str
@@ -187,6 +195,7 @@ class TestImmutableAndFrozen:
 
     def test_frozen_error_messages(self):
         """Test that frozen objects provide helpful error messages."""
+
         class FrozenData(Classno):
             __features__ = Features.FROZEN
             name: str
@@ -200,13 +209,16 @@ class TestImmutableAndFrozen:
         except Exception as e:
             # Should provide meaningful error message
             error_msg = str(e).lower()
-            assert "frozen" in error_msg or "immutable" in error_msg or "read" in error_msg
+            assert (
+                "frozen" in error_msg or "immutable" in error_msg or "read" in error_msg
+            )
 
     def test_frozen_with_factory_defaults(self):
         """Test frozen objects with default factory functions."""
+
         def create_list():
             return [1, 2, 3]
-        
+
         def create_dict():
             return {"default": "value"}
 
@@ -223,7 +235,7 @@ class TestImmutableAndFrozen:
         # Object fields should be frozen
         with pytest.raises(Exception):
             obj.numbers = [4, 5, 6]
-        
+
         with pytest.raises(Exception):
             obj.data = {"new": "dict"}
 
@@ -235,6 +247,7 @@ class TestImmutableAndFrozen:
 
     def test_slots_feature(self):
         """Test SLOTS feature for memory optimization."""
+
         class SlottedClass(Classno):
             __features__ = Features.SLOTS
             name: str
@@ -242,19 +255,19 @@ class TestImmutableAndFrozen:
             optional: str | None = None
 
         obj = SlottedClass(name="test", value=42)
-        
+
         # Should have __slots__
-        assert hasattr(SlottedClass, '__slots__')
-        
+        assert hasattr(SlottedClass, "__slots__")
+
         # Note: SLOTS behavior may vary by implementation
         # Some implementations may still have __dict__ for compatibility
-        if hasattr(obj, '__dict__'):
+        if hasattr(obj, "__dict__"):
             # If __dict__ exists, it might be empty or minimal
             pass
         else:
             # If no __dict__, that's the expected slots behavior
             pass
-        
+
         # Should work normally
         assert obj.name == "test"
         assert obj.value == 42
@@ -266,25 +279,27 @@ class TestImmutableAndFrozen:
 
     def test_slots_with_frozen(self):
         """Test SLOTS combined with FROZEN."""
+
         class SlottedFrozen(Classno):
             __features__ = Features.SLOTS | Features.FROZEN
             name: str
             value: int
 
         obj = SlottedFrozen(name="test", value=42)
-        
+
         # Should have slots (behavior may vary)
-        assert hasattr(SlottedFrozen, '__slots__')
+        assert hasattr(SlottedFrozen, "__slots__")
         # __dict__ behavior may vary by implementation
-        if hasattr(obj, '__dict__'):
+        if hasattr(obj, "__dict__"):
             pass  # Implementation may keep __dict__ for compatibility
-        
+
         # Should be frozen
         with pytest.raises(Exception):
             obj.name = "changed"
 
     def test_immutable_complete_feature_set(self):
         """Test that IMMUTABLE provides the complete immutable experience."""
+
         class CompletelyImmutable(Classno):
             __features__ = Features.IMMUTABLE
             id: int
@@ -308,8 +323,8 @@ class TestImmutableAndFrozen:
             pass
 
         # Should use slots
-        assert hasattr(CompletelyImmutable, '__slots__')
-        assert not hasattr(obj1, '__dict__')
+        assert hasattr(CompletelyImmutable, "__slots__")
+        assert not hasattr(obj1, "__dict__")
 
         # Should be usable in sets and as dict keys
         obj_set = {obj1, obj2}

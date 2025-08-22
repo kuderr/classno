@@ -1,8 +1,9 @@
 import pytest
-from typing import List, Dict, Optional
+from typing import Optional
 
 import classno
 from classno import Classno, Features, field
+from classno import exceptions as excs
 
 
 class TestInheritance:
@@ -10,6 +11,7 @@ class TestInheritance:
 
     def test_basic_inheritance(self):
         """Test basic inheritance of Classno classes."""
+
         class Animal(Classno):
             name: str
             species: str
@@ -19,7 +21,7 @@ class TestInheritance:
             age: int = 0
 
         dog = Dog(name="Buddy", species="Canine", breed="Golden Retriever", age=5)
-        
+
         assert dog.name == "Buddy"
         assert dog.species == "Canine"
         assert dog.breed == "Golden Retriever"
@@ -27,6 +29,7 @@ class TestInheritance:
 
     def test_feature_inheritance(self):
         """Test inheritance of features from parent classes."""
+
         class BaseWithFeatures(Classno):
             __features__ = Features.EQ | Features.HASH
             id: int
@@ -49,6 +52,7 @@ class TestInheritance:
 
     def test_feature_override(self):
         """Test overriding features in child classes."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ
             name: str
@@ -75,46 +79,54 @@ class TestInheritance:
         # Validated child should validate types
         validated = ValidatedChild(name="valid", value=3, score=95.5)
         assert validated.score == 95.5
-        
-        with pytest.raises(TypeError):
+
+        with pytest.raises(excs.ValidationError):
             ValidatedChild(name="invalid", value="not an int")
 
     def test_custom_keys_inheritance(self):
         """Test inheritance of custom comparison keys."""
+
         class BaseWithKeys(Classno):
             __eq_keys__ = {"id"}
             __hash_keys__ = {"id"}
             __features__ = Features.EQ | Features.HASH
-            
+
             id: int
             name: str
 
         class ChildWithAdditionalKeys(BaseWithKeys):
             __eq_keys__ = {"id", "version"}  # Override parent keys
             __hash_keys__ = {"id"}  # Keep parent hash keys
-            
+
             version: str
             data: str = "default"
 
         parent1 = BaseWithKeys(id=1, name="name1")
         parent2 = BaseWithKeys(id=1, name="name2")
-        
+
         # Parents should be equal based on ID only
         assert parent1 == parent2
 
-        child1 = ChildWithAdditionalKeys(id=1, version="1.0", name="child1", data="data1")
-        child2 = ChildWithAdditionalKeys(id=1, version="1.0", name="child2", data="data2")
-        child3 = ChildWithAdditionalKeys(id=1, version="2.0", name="child1", data="data1")
+        child1 = ChildWithAdditionalKeys(
+            id=1, version="1.0", name="child1", data="data1"
+        )
+        child2 = ChildWithAdditionalKeys(
+            id=1, version="1.0", name="child2", data="data2"
+        )
+        child3 = ChildWithAdditionalKeys(
+            id=1, version="2.0", name="child1", data="data1"
+        )
 
         # Children should be equal based on ID and version
         assert child1 == child2  # Same id and version
         assert child1 != child3  # Same id, different version
-        
+
         # Hash should still be based on ID only
         assert hash(child1) == hash(child2) == hash(child3)
 
     def test_deep_inheritance_chain(self):
         """Test deep inheritance chains."""
+
         class Animal(Classno):
             __features__ = Features.EQ
             name: str
@@ -143,7 +155,7 @@ class TestInheritance:
             hunting_style="pack",
             pack_size=8,
             alpha=True,
-            howl_frequency=2.0
+            howl_frequency=2.0,
         )
 
         # Should have all inherited fields
@@ -162,12 +174,13 @@ class TestInheritance:
             hunting_style="pack",
             pack_size=8,
             alpha=True,
-            howl_frequency=2.0
+            howl_frequency=2.0,
         )
         assert wolf == wolf2
 
     def test_multiple_inheritance_mixin_pattern(self):
         """Test multiple inheritance with mixin-like patterns."""
+
         class TimestampMixin(Classno):
             created_at: float = 0.0
             updated_at: float = 0.0
@@ -185,7 +198,7 @@ class TestInheritance:
             content="Some content",
             created_at=1234567890.0,
             version="2.0",
-            revision=5
+            revision=5,
         )
 
         assert doc.title == "Test Document"
@@ -195,6 +208,7 @@ class TestInheritance:
 
     def test_abstract_base_pattern(self):
         """Test abstract base class pattern."""
+
         class Shape(Classno):
             __features__ = Features.EQ | Features.HASH
             name: str
@@ -215,7 +229,7 @@ class TestInheritance:
             radius: float
 
             def area(self) -> float:
-                return 3.14159 * self.radius ** 2
+                return 3.14159 * self.radius**2
 
         rect = Rectangle(name="rectangle", width=10.0, height=5.0, color="red")
         circle = Circle(name="circle", radius=3.0, color="blue")
@@ -230,34 +244,32 @@ class TestInheritance:
 
     def test_inheritance_with_validation(self):
         """Test inheritance combined with validation features."""
+
         class ValidatedBase(Classno):
             __features__ = Features.VALIDATION
             id: int
             name: str
 
         class ValidatedChild(ValidatedBase):
-            scores: List[float]
-            metadata: Dict[str, str] = field(default_factory=dict)
+            scores: list[float]
+            metadata: dict[str, str] = field(default_factory=dict)
 
         # Should validate all fields including inherited ones
-        child = ValidatedChild(
-            id=1,
-            name="test",
-            scores=[95.5, 87.2, 92.0]
-        )
+        child = ValidatedChild(id=1, name="test", scores=[95.5, 87.2, 92.0])
         assert child.id == 1
         assert child.scores == [95.5, 87.2, 92.0]
 
         # Should validate inherited fields
-        with pytest.raises(TypeError):
+        with pytest.raises(excs.ValidationError):
             ValidatedChild(id="not an int", name="test", scores=[])
 
         # Should validate new fields
-        with pytest.raises(TypeError):
+        with pytest.raises(excs.ValidationError):
             ValidatedChild(id=1, name="test", scores="not a list")
 
     def test_inheritance_with_frozen(self):
         """Test inheritance with frozen features."""
+
         class MutableBase(Classno):
             base_field: str
 
@@ -272,15 +284,16 @@ class TestInheritance:
 
         # Child should be completely frozen (including inherited fields)
         child = FrozenChild(base_field="test", child_field=42)
-        
+
         with pytest.raises(Exception):
             child.base_field = "changed"  # Inherited field should be frozen
-        
+
         with pytest.raises(Exception):
             child.child_field = 99  # Own field should be frozen
 
     def test_field_override_in_inheritance(self):
         """Test overriding field definitions in child classes."""
+
         class BaseWithDefaults(Classno):
             name: str = "default_name"
             value: int = 0
@@ -306,6 +319,7 @@ class TestInheritance:
 
     def test_complex_inheritance_with_nested_objects(self):
         """Test inheritance with complex nested object structures."""
+
         class Address(Classno):
             street: str
             city: str
@@ -320,7 +334,7 @@ class TestInheritance:
             __features__ = Features.VALIDATION | Features.EQ
             employee_id: int
             department: str
-            manager: Optional['Employee'] = None
+            manager: Optional["Employee"] = None
 
         address = Address(street="123 Main St", city="Boston")
         manager = Employee(
@@ -328,16 +342,16 @@ class TestInheritance:
             age=45,
             employee_id=1001,
             department="Engineering",
-            address=address
+            address=address,
         )
-        
+
         employee = Employee(
             name="John",
             age=30,
             employee_id=1002,
             department="Engineering",
             manager=manager,
-            address=address
+            address=address,
         )
 
         # Should handle nested inheritance properly
@@ -353,6 +367,7 @@ class TestInheritance:
 
     def test_inheritance_method_resolution_order(self):
         """Test that method resolution order works correctly with Classno."""
+
         class A(Classno):
             a_field: str = "A"
 
