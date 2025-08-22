@@ -175,16 +175,16 @@ class TestFeatureConfiguration:
             name: str
             priority: int = 0
 
-        item1 = CombinedFeatures(name="low", priority=1)
-        item2 = CombinedFeatures(name="high", priority=10)
-        item3 = CombinedFeatures(name="low", priority=1)
+        item1 = CombinedFeatures(name="apple", priority=1)
+        item2 = CombinedFeatures(name="banana", priority=10)
+        item3 = CombinedFeatures(name="apple", priority=1)
 
         # Test equality
         assert item1 == item3
         assert item1 != item2
 
-        # Test ordering
-        assert item1 < item2
+        # Test ordering (alphabetical by name first, then by priority)
+        assert item1 < item2  # "apple" < "banana"
 
         # Test hashing
         item_set = {item1, item2, item3}

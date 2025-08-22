@@ -1,6 +1,7 @@
 import contextlib
 import types
 import typing as t
+import collections
 
 from classno import exceptions as excs
 
@@ -54,25 +55,44 @@ def validate_tuple(value, hint):
         validate_value_hint(val, tp)
 
 
+def validate_frozenset(value, hint):
+    """Validate frozenset types."""
+    tp, *_ = t.get_args(hint)
+    for el in value:
+        validate_value_hint(el, tp)
+
+
+def validate_deque(value, hint):
+    """Validate collections.deque types."""
+    tp, *_ = t.get_args(hint)
+    for el in value:
+        validate_value_hint(el, tp)
+
+
 VALIDATION_ORIGIN_HANDLER = {
     dict: validate_dict,
     list: validate_collection,
     set: validate_collection,
     tuple: validate_tuple,
+    frozenset: validate_frozenset,
+    collections.deque: validate_deque,
+    # Dict-like collections can reuse the dict validator
+    collections.defaultdict: validate_dict,
+    collections.OrderedDict: validate_dict,
+    collections.Counter: validate_dict,
 }
 
 
 def validate_value_hint(value, hint):
-    # Unions: str | None, int | float, etc.
-    if isinstance(hint, types.UnionType):
+    origin = t.get_origin(hint)
+    
+    # Handle Union types (both typing.Union and types.UnionType)
+    if isinstance(hint, types.UnionType) or origin is t.Union:
         for sub_hint in t.get_args(hint):
             with contextlib.suppress(TypeError):
                 validate_value_hint(value, sub_hint)
                 return
-
         raise TypeError
-
-    origin = t.get_origin(hint)
 
     # Simple type: int, bool, str, CustomClass, etc.
     if not origin and not isinstance(value, hint):
@@ -82,4 +102,13 @@ def validate_value_hint(value, hint):
         raise TypeError
 
     if origin:
-        VALIDATION_ORIGIN_HANDLER[origin](value, hint)
+        handler = VALIDATION_ORIGIN_HANDLER.get(origin)
+        if handler:
+            handler(value, hint)
+        else:
+            # Fallback for unknown collection types
+            # If it's iterable but not str/bytes, try to validate as collection
+            if hasattr(origin, '__iter__') and not issubclass(origin, (str, bytes)):
+                validate_collection(value, hint)
+            else:
+                raise TypeError(f"No validation handler for type {origin}")

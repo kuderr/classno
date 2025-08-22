@@ -3,6 +3,7 @@ from typing import List, Dict, Optional
 
 import classno
 from classno import Classno, Features, field
+from classno.exceptions import ValidationError
 
 
 class TestAdvancedFeatures:
@@ -104,7 +105,7 @@ class TestAdvancedFeatures:
     def test_custom_order_keys(self):
         """Test custom ordering keys configuration."""
         class CustomOrderKeys(Classno):
-            __order_keys__ = {"priority", "name"}
+            __order_keys__ = ("priority", "name")  # Use tuple to preserve order
             __features__ = Features.ORDER
             
             priority: int
@@ -168,7 +169,7 @@ class TestAdvancedFeatures:
         assert obj.values == [1, 2, 3]
 
         # Should reject invalid types
-        with pytest.raises(TypeError):
+        with pytest.raises(ValidationError):
             MultiFeatureClass(id="invalid", name="test")
 
         # Should be frozen

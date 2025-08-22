@@ -27,7 +27,11 @@ def init_obj(self, *args, **kwargs):
 
 
 def set_fields(cls: t.Type) -> None:
-    hints = t.get_type_hints(cls)
+    try:
+        hints = t.get_type_hints(cls)
+    except (NameError, AttributeError):
+        # Fall back to using raw annotations if forward references fail
+        hints = getattr(cls, '__annotations__', {})
 
     fields = {}
     for name, hint in hints.items():

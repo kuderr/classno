@@ -1,6 +1,7 @@
 import contextlib
 import types
 import typing as t
+import collections
 
 from classno import exceptions as excs
 
@@ -43,7 +44,9 @@ def cast_collection(value, hint):
     for el in value:
         new_collection.append(cast_value(el, tp))
 
-    return hint(new_collection)
+    # Use the origin type to construct the collection
+    origin = t.get_origin(hint) or hint
+    return origin(new_collection)
 
 
 def cast_tuple(value, hint):
@@ -64,11 +67,35 @@ def cast_tuple(value, hint):
     return tuple(new_value)
 
 
+def cast_frozenset(value, hint):
+    """Cast to frozenset type."""
+    tp, *_ = t.get_args(hint)
+    new_set = set()
+    for el in value:
+        new_set.add(cast_value(el, tp))
+    return frozenset(new_set)
+
+
+def cast_deque(value, hint):
+    """Cast to collections.deque type."""
+    tp, *_ = t.get_args(hint)
+    new_deque = collections.deque()
+    for el in value:
+        new_deque.append(cast_value(el, tp))
+    return new_deque
+
+
 CASTING_ORIGIN_HANDLER = {
     dict: cast_dict,
     list: cast_collection,
     set: cast_collection,
     tuple: cast_tuple,
+    frozenset: cast_frozenset,
+    collections.deque: cast_deque,
+    # Dict-like collections can reuse the dict caster
+    collections.defaultdict: cast_dict,
+    collections.OrderedDict: cast_dict,
+    collections.Counter: cast_dict,
 }
 
 
@@ -85,10 +112,25 @@ def cast_value(value, hint):
 
     # Simple type: int, bool, str, CustomClass, etc.
     if not origin and not isinstance(value, hint):
-        return hint(value)
+        try:
+            return hint(value)
+        except (ValueError, TypeError) as e:
+            raise TypeError(f"Cannot cast {value} to {hint}: {e}") from e
 
     if origin:
-        return CASTING_ORIGIN_HANDLER[origin](value, hint)
+        handler = CASTING_ORIGIN_HANDLER.get(origin)
+        if handler:
+            return handler(value, hint)
+        else:
+            # Fallback for unknown collection types
+            # If it's iterable but not str/bytes, try to cast as collection
+            if hasattr(origin, '__iter__') and not issubclass(origin, (str, bytes)):
+                return cast_collection(value, hint)
+            else:
+                raise TypeError(f"No casting handler for type {origin}")
 
     if isinstance(value, hint):
         return value
+    
+    # This should never be reached, but explicit is better than implicit
+    raise TypeError(f"Unable to cast {value} of type {type(value)} to {hint}")

@@ -52,6 +52,6 @@ def _cmp_factory(
         return NotImplemented
 
     self_key = getattr(self, key)()
-    other_key = getattr(self, key)()
+    other_key = getattr(other, key)()
 
     return op(self_key, other_key)

@@ -4,6 +4,7 @@ from datetime import datetime
 
 import classno
 from classno import Classno, Features, field
+from classno.exceptions import ValidationError
 
 
 class TestComplexNestedStructures:
@@ -123,10 +124,10 @@ class TestComplexNestedStructures:
         assert journey.routes[0].metadata["distance"] == 100
 
         # Should validate nested structures
-        with pytest.raises(TypeError):
+        with pytest.raises(ValidationError):
             invalid_coord = Coordinate(x="invalid", y=20.3)
         
-        with pytest.raises(TypeError):
+        with pytest.raises(ValidationError):
             Route(name="test", waypoints=["invalid waypoint"], metadata={})
 
     def test_nested_collections(self):
