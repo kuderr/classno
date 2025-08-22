@@ -5,11 +5,15 @@ These tests ensure that classno prevents shared mutable defaults
 which can cause unexpected behavior between instances.
 """
 
-import pytest
-from typing import List, Dict, Set
+from typing import Dict
+from typing import List
+from typing import Set
 
-from classno import Classno, field
+import pytest
+
+from classno import Classno
 from classno import Features
+from classno import field
 
 
 class TestMutableDefaultValidation:
@@ -71,7 +75,7 @@ class TestMutableDefaultValidation:
         # Should create successfully
         obj1 = TestClass()
         obj2 = TestClass()
-        
+
         # Verify defaults work
         assert obj1.name == "default"
         assert obj1.count == 0
@@ -88,7 +92,7 @@ class TestMutableDefaultValidation:
 
         obj1 = TestClass()
         obj2 = TestClass()
-        
+
         # Verify each instance has its own list
         obj1.items.append("item1")
         assert obj1.items == ["item1"]
@@ -102,7 +106,7 @@ class TestMutableDefaultValidation:
 
         obj1 = TestClass()
         obj2 = TestClass()
-        
+
         # Verify each instance has its own dict
         obj1.mapping["key"] = 42
         assert obj1.mapping == {"key": 42}
@@ -116,7 +120,7 @@ class TestMutableDefaultValidation:
 
         obj1 = TestClass()
         obj2 = TestClass()
-        
+
         # Verify each instance has its own set
         obj1.items.add("item1")
         assert obj1.items == {"item1"}
@@ -131,11 +135,11 @@ class TestMutableDefaultValidation:
 
         obj1 = TestClass()
         obj2 = TestClass()
-        
+
         # Verify each instance has its own objects with default values
         obj1.items.append("item1")
         obj1.scores["level1"] = 100
-        
+
         assert obj1.items == ["default", "item1"]
         assert obj1.scores == {"start": 0, "level1": 100}
         assert obj2.items == ["default"]  # Should not be affected
@@ -176,7 +180,7 @@ class TestMutableDefaultValidation:
 
         obj1 = TestClass()
         obj2 = TestClass()
-        
+
         # Both should reference the same immutable object
         assert obj1.data is obj2.data
         assert obj1.data._value == 42

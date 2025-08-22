@@ -27,7 +27,7 @@ def cast_fields(obj):
 
 def cast_dict(value, hint):
     keys_type, val_type = t.get_args(hint)
-    
+
     new_dict = {}
     for key, val in value.items():
         # Cast both keys and values
@@ -105,16 +105,16 @@ def cast_value(value, hint):
     # Unions: str | None, int | float, etc.
     if isinstance(hint, types.UnionType) or (origin is not None and origin is t.Union):
         union_args = t.get_args(hint)
-        
+
         # Special handling for None values in Optional types
         if value is None and type(None) in union_args:
             return None
-            
+
         for sub_hint in union_args:
             # Skip None type if we're not dealing with a None value
             if sub_hint is type(None) and value is not None:
                 continue
-                
+
             with contextlib.suppress(TypeError):
                 return cast_value(value, sub_hint)
 

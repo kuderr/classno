@@ -6,12 +6,18 @@ an appropriate exception, never returning None implicitly.
 """
 
 import collections
-import pytest
-from typing import List, Dict, Set, Tuple, Union, Optional
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Set
+from typing import Tuple
+from typing import Union
 
-from classno.core import Classno
-from classno._casting import cast_value
+import pytest
+
 from classno import Features
+from classno._casting import cast_value
+from classno.core import Classno
 
 
 class TestCastingReturns:
@@ -65,7 +71,7 @@ class TestCastingReturns:
         class UncastableObject:
             def __str__(self):
                 raise TypeError("Cannot convert to string")
-        
+
         with pytest.raises(TypeError):
             cast_value([1, UncastableObject(), 3], List[str])
 
@@ -81,7 +87,7 @@ class TestCastingReturns:
         class UncastableObject:
             def __str__(self):
                 raise TypeError("Cannot convert to string")
-        
+
         with pytest.raises(TypeError):
             cast_value({1: UncastableObject()}, Dict[str, str])
 
@@ -139,7 +145,7 @@ class TestCastingReturns:
                 raise TypeError("Cannot convert to string")
             def __int__(self):
                 raise TypeError("Cannot convert to int")
-        
+
         with pytest.raises(TypeError, match="Cannot cast .* to any type in"):
             cast_value(UncastableObject(), Union[int, str])
 
@@ -189,7 +195,7 @@ class TestCastingReturns:
 
     def test_cast_error_paths_raise_exceptions(self):
         """Test that all error paths raise appropriate exceptions."""
-        # Create an object that cannot be converted 
+        # Create an object that cannot be converted
         class UncastableObject:
             def __str__(self):
                 raise TypeError("Cannot convert to string")
@@ -197,7 +203,7 @@ class TestCastingReturns:
                 raise TypeError("Cannot convert to int")
 
         error_cases = [
-            ("not_a_number", int),           # Simple type error - should raise ValueError 
+            ("not_a_number", int),           # Simple type error - should raise ValueError
             ([UncastableObject()], List[str]),         # Collection element error
             ({1: UncastableObject()}, Dict[str, str]), # Dict value error
             ((1, 2, 3), Tuple[str, str]),   # Tuple length error
@@ -211,7 +217,7 @@ class TestCastingReturns:
     def test_integration_with_classno(self):
         """Test casting integration with Classno classes."""
         from classno import field
-        
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             numbers: List[int] = field(default_factory=list)
@@ -219,11 +225,11 @@ class TestCastingReturns:
 
         # Create with wrong types that should be cast
         obj = TestClass(numbers=["1", "2", "3"], mapping={"a": "10", "b": "20"})
-        
+
         # Should have been cast to correct types
         assert obj.numbers == [1, 2, 3]
         assert all(isinstance(x, int) for x in obj.numbers)
-        
+
         assert obj.mapping == {"a": 10, "b": 20}
         assert all(isinstance(v, int) for v in obj.mapping.values())
 
