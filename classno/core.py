@@ -85,9 +85,9 @@ class Classno(metaclass=MetaClassno):
     __fields__: t.ClassVar[dict[str, _fields.Field]] = {}
     __features__: t.ClassVar[c.Features] = c.Features.DEFAULT
 
-    __eq_keys__: t.ClassVar[set[str]] = set()
-    __hash_keys__: t.ClassVar[set[str]] = set()
-    __order_keys__: t.ClassVar[set[str]] = set()
+    __eq_keys__: t.ClassVar[tuple[str, ...]] = ()
+    __hash_keys__: t.ClassVar[tuple[str, ...]] = ()
+    __order_keys__: t.ClassVar[tuple[str, ...]] = ()
 
     __init_hook__ = _hooks.init_obj
     __set_fields_hook__ = _hooks.set_fields

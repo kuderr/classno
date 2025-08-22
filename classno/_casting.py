@@ -27,13 +27,13 @@ def cast_fields(obj):
 
 def cast_dict(value, hint):
     keys_type, val_type = t.get_args(hint)
-    for key in value:
-        if not isinstance(key, keys_type):
-            raise TypeError
-
+    
     new_dict = {}
     for key, val in value.items():
-        new_dict[key] = cast_value(val, val_type)
+        # Cast both keys and values
+        new_key = cast_value(key, keys_type)
+        new_val = cast_value(val, val_type)
+        new_dict[new_key] = new_val
 
     return new_dict
 
@@ -103,12 +103,22 @@ def cast_value(value, hint):
     origin = t.get_origin(hint)
 
     # Unions: str | None, int | float, etc.
-    if isinstance(hint, types.UnionType):
-        for sub_hint in t.get_args(hint):
+    if isinstance(hint, types.UnionType) or (origin is not None and origin is t.Union):
+        union_args = t.get_args(hint)
+        
+        # Special handling for None values in Optional types
+        if value is None and type(None) in union_args:
+            return None
+            
+        for sub_hint in union_args:
+            # Skip None type if we're not dealing with a None value
+            if sub_hint is type(None) and value is not None:
+                continue
+                
             with contextlib.suppress(TypeError):
                 return cast_value(value, sub_hint)
 
-        raise TypeError
+        raise TypeError(f"Cannot cast {value!r} of type {type(value)} to any type in {hint}")
 
     # Simple type: int, bool, str, CustomClass, etc.
     if not origin and not isinstance(value, hint):
