@@ -1,7 +1,6 @@
 import pytest
 from typing import List, Dict, Optional
 
-import classno
 from classno import Classno, Features, field
 from classno.exceptions import ValidationError
 
@@ -11,35 +10,25 @@ class TestAdvancedFeatures:
 
     def test_private_fields(self):
         """Test private field functionality."""
+
         class PrivateFieldsClass(Classno):
             __features__ = Features.PRIVATE
-            public_field: str
-            private_field: str
-            _protected_field: str = "protected_default"
+            field: str
 
-        obj = PrivateFieldsClass(public_field="public", private_field="private")
-        
-        # Public field should work normally
-        assert obj.public_field == "public"
-        obj.public_field = "modified_public"
-        assert obj.public_field == "modified_public"
+        obj = PrivateFieldsClass(field="original")
 
         # Private field should be read-only via normal access
-        assert obj.private_field == "private"
+        assert obj.field == "original"
         with pytest.raises(Exception):
-            obj.private_field = "modified"  # Should fail
-        
-        # But should be writable via underscore prefix
-        obj._private_field = "modified_private"
-        assert obj.private_field == "modified_private"
+            obj.field = "modified"  # Should fail
 
-        # Protected field should work normally
-        assert obj._protected_field == "protected_default"
-        obj._protected_field = "modified_protected"
-        assert obj._protected_field == "modified_protected"
+        # But should be writable via underscore prefix
+        obj._field = "modified"
+        assert obj._field == "modified"
 
     def test_lossy_autocast(self):
         """Test lossy autocasting functionality."""
+
         class AutoCastClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST
             int_field: int
@@ -51,8 +40,8 @@ class TestAdvancedFeatures:
         obj = AutoCastClass(
             int_field=3.14,  # float to int
             float_field=42,  # int to float
-            str_field=123,   # int to str
-            list_field={1, 2, 3}  # set to list
+            str_field=123,  # int to str
+            list_field={1, 2, 3},  # set to list
         )
 
         assert obj.int_field == 3  # 3.14 truncated to 3
@@ -63,10 +52,11 @@ class TestAdvancedFeatures:
 
     def test_custom_hash_keys(self):
         """Test custom hash keys configuration."""
+
         class CustomHashKeys(Classno):
             __hash_keys__ = {"id"}
             __features__ = Features.HASH
-            
+
             id: int
             name: str
             description: str
@@ -85,10 +75,11 @@ class TestAdvancedFeatures:
 
     def test_custom_eq_keys(self):
         """Test custom equality keys configuration."""
+
         class CustomEqKeys(Classno):
             __eq_keys__ = {"id", "name"}
             __features__ = Features.EQ
-            
+
             id: int
             name: str
             description: str
@@ -96,7 +87,9 @@ class TestAdvancedFeatures:
 
         obj1 = CustomEqKeys(id=1, name="test", description="desc1", timestamp=100.0)
         obj2 = CustomEqKeys(id=1, name="test", description="different", timestamp=200.0)
-        obj3 = CustomEqKeys(id=1, name="different", description="desc1", timestamp=100.0)
+        obj3 = CustomEqKeys(
+            id=1, name="different", description="desc1", timestamp=100.0
+        )
 
         # Should be equal based only on id and name
         assert obj1 == obj2  # Same id and name, different description and timestamp
@@ -104,10 +97,11 @@ class TestAdvancedFeatures:
 
     def test_custom_order_keys(self):
         """Test custom ordering keys configuration."""
+
         class CustomOrderKeys(Classno):
             __order_keys__ = ("priority", "name")  # Use tuple to preserve order
             __features__ = Features.ORDER
-            
+
             priority: int
             name: str
             description: str
@@ -126,12 +120,13 @@ class TestAdvancedFeatures:
 
     def test_combined_custom_keys(self):
         """Test combining all custom key configurations."""
+
         class CombinedCustomKeys(Classno):
             __hash_keys__ = {"id"}
             __eq_keys__ = {"id", "version"}
             __order_keys__ = {"name"}
             __features__ = Features.HASH | Features.EQ | Features.ORDER
-            
+
             id: int
             version: str
             name: str
@@ -154,11 +149,14 @@ class TestAdvancedFeatures:
 
     def test_feature_interactions(self):
         """Test interactions between different features."""
+
         class MultiFeatureClass(Classno):
-            __features__ = Features.VALIDATION | Features.FROZEN | Features.HASH | Features.EQ
+            __features__ = (
+                Features.VALIDATION | Features.FROZEN | Features.HASH | Features.EQ
+            )
             __hash_keys__ = {"id"}
             __eq_keys__ = {"id"}
-            
+
             id: int
             name: str
             values: List[int] = field(default_factory=list)
@@ -183,6 +181,7 @@ class TestAdvancedFeatures:
 
     def test_inheritance_with_features(self):
         """Test feature inheritance and overriding."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ | Features.HASH
             id: int
@@ -213,9 +212,10 @@ class TestAdvancedFeatures:
 
     def test_complex_autocast_scenarios(self):
         """Test complex autocasting scenarios."""
+
         class ComplexAutoCast(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.VALIDATION
-            
+
             numbers: List[int]
             mapping: Dict[str, float]
             tuple_data: tuple[int, str]
@@ -224,7 +224,7 @@ class TestAdvancedFeatures:
         obj = ComplexAutoCast(
             numbers=[1.1, 2.9, 3.5],  # floats to ints
             mapping={"a": 1, "b": 2},  # ints to floats
-            tuple_data=(3.14, 42)  # float to int, int to str
+            tuple_data=(3.14, 42),  # float to int, int to str
         )
 
         assert obj.numbers == [1, 2, 3]  # Truncated floats
@@ -233,9 +233,10 @@ class TestAdvancedFeatures:
 
     def test_edge_case_empty_collections(self):
         """Test edge cases with empty collections."""
+
         class EmptyCollections(Classno):
             __features__ = Features.VALIDATION | Features.EQ
-            
+
             empty_list: List[int] = field(default_factory=list)
             empty_dict: Dict[str, int] = field(default_factory=dict)
             optional_list: Optional[List[str]] = None
@@ -260,13 +261,16 @@ class TestAdvancedFeatures:
 
     def test_metadata_preservation(self):
         """Test that field metadata is preserved and accessible."""
+
         class MetadataClass(Classno):
             name: str = field(metadata={"required": True, "max_length": 50})
-            score: float = field(default=0.0, metadata={"min_value": 0.0, "max_value": 100.0})
+            score: float = field(
+                default=0.0, metadata={"min_value": 0.0, "max_value": 100.0}
+            )
             tags: List[str] = field(default_factory=list, metadata={"indexed": True})
 
         obj = MetadataClass(name="test")
-        
+
         # The metadata should be accessible through the field definition
         # This tests that metadata is properly stored and doesn't interfere with functionality
         assert obj.name == "test"
@@ -275,13 +279,14 @@ class TestAdvancedFeatures:
 
     def test_field_default_vs_default_factory(self):
         """Test the difference between default and default_factory."""
+
         class DefaultTest(Classno):
             # Using mutable default (should use same instance)
             shared_list: list = []
-            
+
             # Using default_factory (should create new instance each time)
             unique_list: list = field(default_factory=list)
-            
+
             name: str = "default_name"
 
         obj1 = DefaultTest()

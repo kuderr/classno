@@ -6,37 +6,13 @@ from classno import constants as c
 
 
 def private_name_retrieval(self, name: str) -> str:
-    # Check if we have a private field designation
-    private_fields = getattr(self, '__private_fields__', set())
-    
-    # If it's already an underscore-prefixed field, allow normal access
-    if name in self.__fields__ and name.startswith("_"):
-        return name
-    
-    # If it's a field marked as private, or named 'secret' or ends with 'private_field', block direct access
-    is_private = (
-        name in private_fields or 
-        name == "secret" or 
-        name.endswith("private_field") or
-        name == "private_field"
-    )
-    
-    if name in self.__fields__ and is_private:
+    if name in self.__fields__:
         raise Exception("privates only")
 
-    # If it's an underscore-prefixed access, convert to the actual field name
-    if name.startswith("_"):
-        actual_name = name[1:]
-        if actual_name in self.__fields__:
-            return actual_name
-        else:
-            raise Exception(f"Attr {name} not found")
-    
-    # Default case: allow access
-    if name in self.__fields__:
-        return name
-        
-    return name
+    if name.startswith("_") and name[1:] not in self.__fields__:
+        raise Exception(f"Attr {name} not found")
+
+    return name[1:]
 
 
 def frozen_handler(self, name: str, value: t.Any) -> t.Never:
