@@ -5,6 +5,7 @@
 [![downloads](https://static.pepy.tech/badge/classno/month)](https://www.pepy.tech/projects/classno)
 [![versions](https://img.shields.io/pypi/pyversions/classno.svg)](https://github.com/kuderr/classno)
 [![license](https://img.shields.io/github/license/kuderr/classno.svg)](https://github.com/kuderr/classno/blob/master/LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kuderr/classno)
 
 Classno is a lightweight and extensible Python library for data modeling, schema definition, and validation. It provides a clean and intuitive way to define data classes with various features like type validation, immutability, private fields, and automatic type casting.
 
