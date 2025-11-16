@@ -95,15 +95,15 @@ class TestFeatureCombinations:
             __features__ = Features.PRIVATE | Features.REPR | Features.EQ
             name: str
             _secret: str
-            __private: int
+            _private: int  # Single underscore to avoid Python name mangling
 
-        obj = TestClass(name="test", _secret="hidden", __private=42)
+        obj = TestClass(name="test", _secret="hidden", _private=42)
 
         # Repr should not show private attributes
         repr_str = repr(obj)
         assert "name='test'" in repr_str
         assert "_secret" not in repr_str
-        assert "__private" not in repr_str
+        assert "_private" not in repr_str
 
     def test_immutable_feature_combination(self):
         """Test IMMUTABLE (combined feature)."""

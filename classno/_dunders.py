@@ -22,7 +22,7 @@ def _hash_value(self):
         elif isinstance(obj, (list, set)):
             # For lists and sets, convert elements recursively
             return tuple(make_hashable(item) for item in obj)
-        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes)):
+        elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes)):
             try:
                 # For other iterables, try to convert elements recursively
                 return tuple(make_hashable(item) for item in obj)

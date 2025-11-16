@@ -3,6 +3,7 @@ import contextlib
 import types
 import typing as t
 
+from classno import _errors
 from classno import exceptions as excs
 
 
@@ -16,8 +17,7 @@ def validate_fields(obj):
             validate_value_hint(attr, field.hint)
         except TypeError:
             errors.append(
-                f"For field {field.name}, expected {field.hint} "
-                + f"but got {attr!r} of type {type(attr)}"
+                _errors.ErrorFormatter.validation_error(field.name, field.hint, attr)
             )
 
     if errors:
@@ -25,7 +25,17 @@ def validate_fields(obj):
 
 
 def validate_dict(value, hint):
-    keys_type, val_type = t.get_args(hint)
+    args = t.get_args(hint)
+    if len(args) == 2:
+        keys_type, val_type = args
+    elif len(args) == 1:
+        # Counter[str] only has key type, values are always int
+        keys_type = args[0]
+        val_type = int
+    else:
+        # No type args, accept any
+        return
+
     for key in value:
         if not isinstance(key, keys_type):
             raise TypeError
@@ -91,7 +101,7 @@ def validate_value_hint(value, hint):
         # For ForwardRef, we need to check if the value is an instance of a class
         # with the same name as the forward reference
         expected_name = hint.__forward_arg__
-        if hasattr(value, '__class__'):
+        if hasattr(value, "__class__"):
             actual_name = value.__class__.__name__
             if actual_name == expected_name:
                 return  # Valid ForwardRef match
@@ -119,7 +129,7 @@ def validate_value_hint(value, hint):
         else:
             # Fallback for unknown collection types
             # If it's iterable but not str/bytes, try to validate as collection
-            if hasattr(origin, '__iter__') and not issubclass(origin, (str, bytes)):
+            if hasattr(origin, "__iter__") and not issubclass(origin, (str, bytes)):
                 validate_collection(value, hint)
             else:
-                raise TypeError(f"No validation handler for type {origin}")
+                raise TypeError(_errors.ErrorFormatter.validation_no_handler(origin))

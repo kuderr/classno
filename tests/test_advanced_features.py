@@ -283,26 +283,23 @@ class TestAdvancedFeatures:
         assert obj.tags == []
 
     def test_field_default_vs_default_factory(self):
-        """Test the difference between default and default_factory."""
+        """Test that mutable defaults are prevented and default_factory works."""
 
-        class DefaultTest(Classno):
-            # Using mutable default (should use same instance)
-            shared_list: list = []
+        # Mutable default should raise ValueError
+        with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+            class BadDefaultTest(Classno):
+                # Using mutable default (should raise error)
+                shared_list: list = []
+                name: str = "default_name"
 
+        # Proper way: using default_factory
+        class GoodDefaultTest(Classno):
             # Using default_factory (should create new instance each time)
             unique_list: list = field(default_factory=list)
-
             name: str = "default_name"
 
-        obj1 = DefaultTest()
-        obj2 = DefaultTest()
-
-        # shared_list should be the same object instance
-        obj1.shared_list.append("item1")
-        obj2.shared_list.append("item2")
-        assert obj1.shared_list == ["item1", "item2"]
-        assert obj2.shared_list == ["item1", "item2"]
-        assert obj1.shared_list is obj2.shared_list
+        obj1 = GoodDefaultTest()
+        obj2 = GoodDefaultTest()
 
         # unique_list should be different instances
         obj1.unique_list.append("unique1")

@@ -5,6 +5,7 @@ This test suite provides comprehensive coverage of the classno library functiona
 ## Test Files Overview
 
 ### `test_working_features.py` ✅ (All Pass)
+
 Tests the core working functionality of the classno library:
 
 - **Basic Creation and Assignment**: Simple object creation and field modification
@@ -24,6 +25,7 @@ Tests the core working functionality of the classno library:
 - **Optional Fields**: Optional type handling
 
 ### `test_comprehensive_scenarios.py` ✅ (Passing Tests)
+
 Real-world usage scenarios that work correctly:
 
 - **Configuration Management**: Nested configuration objects with defaults and validation
@@ -32,6 +34,7 @@ Real-world usage scenarios that work correctly:
 - **Performance**: Handling objects with many fields efficiently
 
 ### Other Test Files (Legacy/Exploratory)
+
 These files contain tests that explore the library's boundaries and edge cases. Some tests may fail due to the library's specific implementation details:
 
 - `test_basic_functionality.py`: Original basic functionality tests
@@ -45,12 +48,14 @@ These files contain tests that explore the library's boundaries and edge cases. 
 ## Key Features Confirmed Working
 
 ### Core Features
+
 - ✅ Basic object creation with type hints
 - ✅ Default values and default factory functions
 - ✅ Field metadata support
 - ✅ Required field validation
 
 ### Feature Flags
+
 - ✅ `Features.VALIDATION`: Type validation with ValidationError
 - ✅ `Features.FROZEN`: Immutable objects
 - ✅ `Features.PRIVATE`: Private field access control
@@ -61,6 +66,7 @@ These files contain tests that explore the library's boundaries and edge cases. 
 - ✅ Custom `__hash_keys__` and `__eq_keys__`: Custom comparison
 
 ### Type Support
+
 - ✅ Basic types: str, int, float, bool
 - ✅ Collections: List, Dict (with simple generics)
 - ✅ Basic Optional types (with proper defaults)
@@ -68,6 +74,7 @@ These files contain tests that explore the library's boundaries and edge cases. 
 - ✅ Nested Classno objects
 
 ### Advanced Patterns
+
 - ✅ Inheritance from Classno classes
 - ✅ Multiple inheritance (mixin patterns)
 - ✅ Factory default functions
@@ -77,11 +84,13 @@ These files contain tests that explore the library's boundaries and edge cases. 
 ## Library Limitations Discovered
 
 ### Validation Strictness
+
 - Optional[T] types with None values may cause validation errors
 - Complex Union types may not validate correctly
 - Nested generic types (e.g., Dict[str, Union[str, int]]) may fail validation
 
 ### Feature Behavior
+
 - EQ feature may not work as expected for inequality comparisons
 - Custom comparison keys may not always work as intended
 - Some feature combinations may have unexpected interactions
@@ -89,6 +98,7 @@ These files contain tests that explore the library's boundaries and edge cases. 
 ## Running Tests
 
 To run the working test suite:
+
 ```bash
 # Run all working tests
 poetry run pytest tests/test_working_features.py -v

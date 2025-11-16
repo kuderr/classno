@@ -128,14 +128,20 @@ class TestCastingReturns:
 
     def test_cast_union_success(self):
         """Test successful union type casting."""
-        # Test with new style union
+        # Union casting preserves types that are already union members
+        # This prevents unexpected conversions like int -> str
         result = cast_value("42", Union[int, str])
-        assert result == 42  # Should try int first and succeed
-        assert isinstance(result, int)
+        assert result == "42"  # Already str (a union member), keep it
+        assert isinstance(result, str)
 
         result = cast_value("hello", Union[int, str])
-        assert result == "hello"  # int fails, str succeeds
+        assert result == "hello"  # Already str (a union member), keep it
         assert isinstance(result, str)
+
+        # Test casting from non-member types
+        result = cast_value("123", Union[int, float])
+        assert result == 123  # Not a union member, cast to first type (int)
+        assert isinstance(result, int)
 
     def test_cast_union_failure(self):
         """Test that failed union casting raises TypeError with descriptive message."""

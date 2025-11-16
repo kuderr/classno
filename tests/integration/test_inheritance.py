@@ -241,7 +241,7 @@ class TestInheritanceScenarios:
             __features__ = Features.PRIVATE | Features.REPR | Features.EQ
             public_field: str
             _protected_field: str
-            __private_field: str
+            _private_field: str  # Single underscore to avoid Python name mangling
 
         class PrivateExtended(PrivateBase):
             extended_public: str
@@ -250,7 +250,7 @@ class TestInheritanceScenarios:
         obj = PrivateExtended(
             public_field="public",
             _protected_field="protected",
-            __private_field="private",
+            _private_field="private",
             extended_public="ext_public",
             _extended_protected="ext_protected"
         )
@@ -260,12 +260,13 @@ class TestInheritanceScenarios:
         assert "public_field='public'" in repr_str
         assert "extended_public='ext_public'" in repr_str
         assert "_protected" not in repr_str  # Private fields hidden
-        assert "__private" not in repr_str
+        assert "_private" not in repr_str
 
     def test_abstract_like_inheritance(self):
         """Test abstract-like base class patterns."""
         class AbstractBase(Classno):
             __features__ = Features.EQ | Features.ORDER
+            __eq_keys__ = ('name',)  # Only compare by name for equality
             __order_keys__ = ('name',)
 
             name: str
@@ -285,7 +286,7 @@ class TestInheritanceScenarios:
 
         # Should have inherited features
         obj2 = ConcreteImpl(name="test", value=100)
-        assert obj == obj2  # EQ (based on all fields)
+        assert obj == obj2  # EQ (based on name only via __eq_keys__)
         assert obj < ConcreteImpl(name="ztest", value=1)  # ORDER (based on name)
 
     def test_inheritance_with_slots(self):

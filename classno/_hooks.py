@@ -1,5 +1,6 @@
 import typing as t
 
+from classno import _errors
 from classno import _feature_handlers
 from classno import _fields
 from classno import _setattrs
@@ -21,8 +22,9 @@ def init_obj(self, *args, **kwargs):
 
     if missing_fields:
         raise TypeError(
-            f"{self.__class__.__name__}.__init__() missing {len(missing_fields)} "
-            f"required arguments: {', '.join(f'{arg}' for arg in missing_fields)}"
+            _errors.ErrorFormatter.missing_required_fields(
+                self.__class__.__name__, missing_fields
+            )
         )
 
 
@@ -30,7 +32,7 @@ def set_fields(cls: t.Type) -> None:
     # Collect annotations from all classes in the MRO
     all_annotations = {}
     for base in reversed(cls.__mro__):
-        if hasattr(base, '__annotations__'):
+        if hasattr(base, "__annotations__"):
             all_annotations.update(base.__annotations__)
 
     try:
@@ -41,7 +43,7 @@ def set_fields(cls: t.Type) -> None:
 
     fields = {}
     # Check for field defaults stored by the metaclass for slots compatibility
-    field_defaults = getattr(cls, '_field_defaults', {})
+    field_defaults = getattr(cls, "_field_defaults", {})
 
     for name, hint in hints.items():
         if name in c._CLASSNO_ATTRS:

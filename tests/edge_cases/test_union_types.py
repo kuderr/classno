@@ -202,24 +202,23 @@ class TestUnionTypesEdgeCases:
 
     def test_union_with_generics(self):
         """Test Union types with generic parameters."""
-        class TestClass(Classno):
-            __features__ = Features.EQ
-            list_or_dict_generic: Union[List[T], Dict[str, T]] = field(default_factory=list)
-
-        # This is tricky because T is not defined - let's use concrete types
+        # Note: Generic TypeVars need to be defined, so we use concrete types instead
 
         class ConcreteTestClass(Classno):
             __features__ = Features.EQ
-            int_list_or_dict: Union[List[int], Dict[str, int]] = field(default_factory=list)
-            str_list_or_dict: Union[List[str], Dict[str, str]] = field(default_factory=list)
+            int_list_or_dict: Union[List[int], Dict[str, int]] = field(
+                default_factory=list
+            )
+            str_list_or_dict: Union[List[str], Dict[str, str]] = field(
+                default_factory=list
+            )
 
         obj1 = ConcreteTestClass()
         assert obj1.int_list_or_dict == []
         assert obj1.str_list_or_dict == []
 
         obj2 = ConcreteTestClass(
-            int_list_or_dict=[1, 2, 3],
-            str_list_or_dict={"a": "x", "b": "y"}
+            int_list_or_dict=[1, 2, 3], str_list_or_dict={"a": "x", "b": "y"}
         )
         assert obj2.int_list_or_dict == [1, 2, 3]
         assert obj2.str_list_or_dict == {"a": "x", "b": "y"}
@@ -340,10 +339,12 @@ class TestUnionTypesEdgeCases:
         # Invalid type - should be rejected if validation is strict
         # Note: Behavior depends on validation implementation
         # Some might cast, others might reject
+        from classno.exceptions import ValidationError
+
         try:
             obj = TestClass(limited_union=[1, 2, 3])  # List not in union
             # If this succeeds, casting/coercion is happening
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, ValidationError):
             # Validation correctly rejected the invalid type
             pass
 

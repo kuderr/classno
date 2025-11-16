@@ -5,7 +5,13 @@ class BaseErrorsCollection(Exception):
         super().__init__("".join(error_lines))
 
 
-class ValidationError(BaseErrorsCollection): ...
+class ValidationError(TypeError, BaseErrorsCollection):
+    """Validation error - inherits from TypeError for compatibility."""
+
+    pass
 
 
-class CastingError(BaseErrorsCollection): ...
+class CastingError(TypeError, BaseErrorsCollection):
+    """Casting error - inherits from TypeError for compatibility."""
+
+    pass
