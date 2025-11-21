@@ -5,6 +5,9 @@ requires = ["poetry-core"]
 [tool.poe.env]
 DIRS = "classno tests examples"
 
+[tool.poe.tasks.coverage-report]
+cmd = "poetry run pytest tests/ --cov=classno --cov-report=html --cov-report=term-missing --cov-fail-under=90"
+
 [tool.poe.tasks.lint]
 default_item_type = "cmd"
 sequence = [
@@ -20,13 +23,31 @@ sequence = [
   "poetry run toml-sort --in-place --all pyproject.toml"
 ]
 
+[tool.poe.tasks.test-all]
+cmd = "poetry run pytest tests/ --cov=classno --cov-report=html --cov-report=term-missing -v"
+
+[tool.poe.tasks.test-edge-cases]
+cmd = "poetry run pytest tests/edge_cases/ -v"
+
+[tool.poe.tasks.test-fast]
+cmd = "poetry run pytest tests/ -v -m 'not slow' --maxfail=5"
+
+[tool.poe.tasks.test-integration]
+cmd = "poetry run pytest tests/integration/ -v"
+
+[tool.poe.tasks.test-regression]
+cmd = "poetry run pytest tests/regression/ -v"
+
+[tool.poe.tasks.test-unit]
+cmd = "poetry run pytest tests/unit/ -v -m 'not slow'"
+
 [tool.poe.tasks.tests]
-cmd = "poetry run pytest -vvv --cov=. --cov-report html"
+cmd = "poetry run pytest -vvv"
 
 [tool.poetry]
 authors = ["kuderr <dakudryavcev@gmail.com>"]
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 4 - Beta",
   "Topic :: Software Development :: Libraries"
 ]
 description = ""
@@ -55,4 +76,19 @@ toml-sort = "^0.23.1"
 typeCheckingMode = 'off'
 
 [tool.pytest.ini_options]
-addopts = "-ra --log-level=DEBUG --showlocals --verbose"
+addopts = "-ra --log-level=DEBUG --showlocals --verbose --cov=classno --cov-report=term-missing --cov-report=html"
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning"
+]
+markers = [
+  "edge_case: Edge case tests",
+  "integration: Integration tests",
+  "regression: Regression tests",
+  "slow: Slow-running tests",
+  "unit: Unit tests"
+]
+python_classes = ["Test*"]
+python_files = ["*_test.py", "test_*.py"]
+python_functions = ["test_*"]
+testpaths = ["tests"]

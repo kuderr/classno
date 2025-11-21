@@ -1,5 +1,9 @@
 import typing as t
 
+from classno import _errors
+
 
 def frozen_delattr(self, name: str) -> t.Never:
-    raise Exception(f"Cannot delete attrs of frozen class {self.__class__.__name__}")
+    raise AttributeError(
+        _errors.ErrorFormatter.frozen_delete_error(self.__class__.__name__)
+    )
