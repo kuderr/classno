@@ -53,6 +53,34 @@ This document tracks planned improvements and enhancements for the Classno libra
 
 ### Features & Functionality
 
+- [ ] **Configuration Management (Settings Feature)**
+
+  - Pydantic Settings-like functionality for application configuration
+  - Load from environment variables, JSON, YAML, TOML, .env files
+  - **See detailed plan**: [docs/settings-feature.md](docs/settings-feature.md)
+
+  Key capabilities:
+  - Environment variable loading with prefix support (`__env_prefix__`)
+  - Multiple config file formats (JSON, YAML, TOML, .env)
+  - Pluggable `ConfigSource` abstraction for custom sources
+  - Secret field handling (sensitive data hidden in repr)
+  - Nested configuration models with automatic prefix propagation
+  - Works seamlessly with existing `VALIDATION` and `LOSSY_AUTOCAST` features
+  - Zero new required dependencies (optional: python-dotenv, PyYAML, tomli)
+
+  ```python
+  class Settings(Classno):
+      __features__ = Features.SETTINGS | Features.VALIDATION
+      __env_prefix__ = "APP_"
+      __config_file__ = "config.json"
+
+      debug: bool = field(default=False)
+      database_url: str = field(metadata={"env": "DATABASE_URL", "secret": True})
+
+  # Automatically loads from environment, config files, and defaults
+  settings = Settings()
+  ```
+
 - [ ] **Add strict/lossless autocasting mode**
 
   - Alternative to `LOSSY_AUTOCAST` that only allows safe conversions
