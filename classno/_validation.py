@@ -93,43 +93,116 @@ VALIDATION_ORIGIN_HANDLER = {
 }
 
 
+def validate_forward_ref(value, hint):
+    """Validate a ForwardRef type.
+
+    ForwardRefs are used for circular/self-referential type hints.
+
+    Args:
+        value: Value to validate
+        hint: ForwardRef type hint
+
+    Raises:
+        TypeError: If value doesn't match the forward reference
+    """
+    # For ForwardRef, we need to check if the value is an instance of a class
+    # with the same name as the forward reference
+    expected_name = hint.__forward_arg__
+    if hasattr(value, "__class__"):
+        actual_name = value.__class__.__name__
+        if actual_name == expected_name:
+            return  # Valid ForwardRef match
+    raise TypeError
+
+
+def validate_union(value, hint):
+    """Validate a Union type.
+
+    Handles Optional[T] and Union[T1, T2, ...] types.
+
+    Args:
+        value: Value to validate
+        hint: Union type hint
+
+    Raises:
+        TypeError: If value doesn't match any type in the Union
+    """
+    for sub_hint in t.get_args(hint):
+        with contextlib.suppress(TypeError):
+            validate_value_hint(value, sub_hint)
+            return
+    raise TypeError
+
+
+def validate_simple_type(value, hint):
+    """Validate a simple (non-generic) type.
+
+    Handles primitives like int, str, bool, and custom classes.
+
+    Args:
+        value: Value to validate
+        hint: Target type hint
+
+    Raises:
+        TypeError: If value doesn't match the target type
+    """
+    if not isinstance(value, hint):
+        raise TypeError
+
+
+def validate_with_origin(value, hint, origin):
+    """Validate a generic type with origin.
+
+    Handles types like List[int], Dict[str, int], Set[str], etc.
+
+    Args:
+        value: Value to validate
+        hint: Generic type hint
+        origin: Origin type (e.g., list, dict, set)
+
+    Raises:
+        TypeError: If value doesn't match the target type
+    """
+    # First check if value is the correct origin type
+    if not isinstance(value, origin):
+        raise TypeError
+
+    # Then validate the inner elements
+    handler = VALIDATION_ORIGIN_HANDLER.get(origin)
+    if handler:
+        handler(value, hint)
+    else:
+        # Fallback for unknown collection types
+        # If it's iterable but not str/bytes, try to validate as collection
+        if hasattr(origin, "__iter__") and not issubclass(origin, (str, bytes)):
+            validate_collection(value, hint)
+        else:
+            raise TypeError(_errors.ErrorFormatter.validation_no_handler(origin))
+
+
 def validate_value_hint(value, hint):
+    """Main dispatcher for validating values against type hints.
+
+    Args:
+        value: Value to validate
+        hint: Target type hint
+
+    Raises:
+        TypeError: If value doesn't match the target type
+    """
+    # Handle ForwardRef (circular/self-referential types)
+    if isinstance(hint, t.ForwardRef):
+        return validate_forward_ref(value, hint)
+
     origin = t.get_origin(hint)
 
-    # Handle ForwardRef - need to resolve it to the actual class
-    if isinstance(hint, t.ForwardRef):
-        # For ForwardRef, we need to check if the value is an instance of a class
-        # with the same name as the forward reference
-        expected_name = hint.__forward_arg__
-        if hasattr(value, "__class__"):
-            actual_name = value.__class__.__name__
-            if actual_name == expected_name:
-                return  # Valid ForwardRef match
-        raise TypeError
-
-    # Handle Union types (both typing.Union and types.UnionType)
+    # Handle Union types (including Optional)
     if isinstance(hint, types.UnionType) or origin is t.Union:
-        for sub_hint in t.get_args(hint):
-            with contextlib.suppress(TypeError):
-                validate_value_hint(value, sub_hint)
-                return
-        raise TypeError
+        return validate_union(value, hint)
 
-    # Simple type: int, bool, str, CustomClass, etc.
-    if not origin and not isinstance(value, hint):
-        raise TypeError
+    # Handle simple types (no generic origin)
+    if not origin:
+        return validate_simple_type(value, hint)
 
-    if origin and not isinstance(value, origin):
-        raise TypeError
-
-    if origin:
-        handler = VALIDATION_ORIGIN_HANDLER.get(origin)
-        if handler:
-            handler(value, hint)
-        else:
-            # Fallback for unknown collection types
-            # If it's iterable but not str/bytes, try to validate as collection
-            if hasattr(origin, "__iter__") and not issubclass(origin, (str, bytes)):
-                validate_collection(value, hint)
-            else:
-                raise TypeError(_errors.ErrorFormatter.validation_no_handler(origin))
+    # Handle generic types with origin (List[int], Dict[str, int], etc.)
+    return validate_with_origin(value, hint, origin)

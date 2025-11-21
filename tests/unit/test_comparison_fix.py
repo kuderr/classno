@@ -13,6 +13,7 @@ class TestComparisonFix:
 
     def test_basic_equality_with_different_values(self):
         """Test that objects with different values are not equal."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             value: int
@@ -26,6 +27,7 @@ class TestComparisonFix:
 
     def test_basic_equality_with_same_values(self):
         """Test that objects with same values are equal."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             value: int
@@ -38,6 +40,7 @@ class TestComparisonFix:
 
     def test_equality_with_multiple_fields(self):
         """Test equality with multiple fields."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             name: str
@@ -60,6 +63,7 @@ class TestComparisonFix:
 
     def test_custom_eq_keys(self):
         """Test equality with custom __eq_keys__."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             __eq_keys__ = {"id"}
@@ -80,6 +84,7 @@ class TestComparisonFix:
 
     def test_ordering_operations(self):
         """Test that ordering operations work correctly."""
+
         class TestClass(Classno):
             __features__ = Features.ORDER
             value: int
@@ -110,6 +115,7 @@ class TestComparisonFix:
 
     def test_custom_order_keys(self):
         """Test ordering with custom __order_keys__."""
+
         class TestClass(Classno):
             __features__ = Features.ORDER
             __order_keys__ = {"id"}  # Use single key to avoid order issues
@@ -139,6 +145,7 @@ class TestComparisonFix:
 
     def test_combined_eq_and_order_features(self):
         """Test that EQ and ORDER features work together."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.ORDER
             value: int
@@ -159,6 +166,7 @@ class TestComparisonFix:
 
     def test_different_classes_return_not_implemented(self):
         """Test that comparing different classes returns NotImplemented."""
+
         class TestClass1(Classno):
             __features__ = Features.EQ
             value: int
@@ -177,6 +185,7 @@ class TestComparisonFix:
 
     def test_inheritance_comparison(self):
         """Test comparison with class inheritance."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ
             base_value: int
@@ -200,6 +209,7 @@ class TestComparisonFix:
 
     def test_edge_cases_with_none_values(self):
         """Test comparison with None values in fields."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             name: str
@@ -214,6 +224,7 @@ class TestComparisonFix:
 
     def test_hash_consistency_with_equality(self):
         """Test that hash values are consistent with equality."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.HASH
             value: int
@@ -233,6 +244,7 @@ class TestComparisonFix:
 
     def test_custom_hash_keys_with_equality(self):
         """Test custom hash keys work with equality comparison."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.HASH
             __eq_keys__ = {"id"}
@@ -255,6 +267,7 @@ class TestComparisonFix:
 
     def test_reflexivity_symmetry_transitivity(self):
         """Test mathematical properties of equality."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             value: int

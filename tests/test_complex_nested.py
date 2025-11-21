@@ -17,6 +17,7 @@ class TestComplexNestedStructures:
 
     def test_basic_nested_objects(self):
         """Test basic nested Classno objects."""
+
         class Address(Classno):
             street: str
             city: str
@@ -41,6 +42,7 @@ class TestComplexNestedStructures:
 
     def test_deeply_nested_structures(self):
         """Test deeply nested structures with multiple levels."""
+
         class ContactInfo(Classno):
             email: str
             phone: Optional[str] = None
@@ -69,15 +71,30 @@ class TestComplexNestedStructures:
 
         # Build up the nested structure
         contact = ContactInfo(email="john@example.com", phone="555-1234")
-        address = Address(street="123 Main St", city="Boston", state="MA", postal_code="02101")
-        manager = Person(first_name="John", last_name="Doe", contact=contact, address=address)
+        address = Address(
+            street="123 Main St", city="Boston", state="MA", postal_code="02101"
+        )
+        manager = Person(
+            first_name="John", last_name="Doe", contact=contact, address=address
+        )
 
         emp_contact = ContactInfo(email="jane@example.com")
-        emp_address = Address(street="456 Oak Ave", city="Cambridge", state="MA", postal_code="02138")
-        employee = Person(first_name="Jane", last_name="Smith", contact=emp_contact, address=emp_address)
+        emp_address = Address(
+            street="456 Oak Ave", city="Cambridge", state="MA", postal_code="02138"
+        )
+        employee = Person(
+            first_name="Jane",
+            last_name="Smith",
+            contact=emp_contact,
+            address=emp_address,
+        )
 
-        hq_address = Address(street="789 Corporate Blvd", city="Boston", state="MA", postal_code="02102")
-        company = Company(name="Tech Corp", employees=[manager, employee], headquarters=hq_address)
+        hq_address = Address(
+            street="789 Corporate Blvd", city="Boston", state="MA", postal_code="02102"
+        )
+        company = Company(
+            name="Tech Corp", employees=[manager, employee], headquarters=hq_address
+        )
 
         department = Department(name="Engineering", manager=manager, company=company)
 
@@ -93,6 +110,7 @@ class TestComplexNestedStructures:
 
     def test_nested_with_validation(self):
         """Test nested structures with validation enabled."""
+
         class Coordinate(Classno):
             __features__ = Features.VALIDATION
             x: float
@@ -117,7 +135,7 @@ class TestComplexNestedStructures:
         route = Route(
             name="Main Route",
             waypoints=[coord1, coord2],
-            metadata={"distance": 100, "difficulty": "easy"}
+            metadata={"distance": 100, "difficulty": "easy"},
         )
         journey = Journey(title="Mountain Hike", routes=[route])
 
@@ -130,13 +148,14 @@ class TestComplexNestedStructures:
 
         # Should validate nested structures
         with pytest.raises(ValidationError):
-            invalid_coord = Coordinate(x="invalid", y=20.3)
+            _ = Coordinate(x="invalid", y=20.3)
 
         with pytest.raises(ValidationError):
             Route(name="test", waypoints=["invalid waypoint"], metadata={})
 
     def test_nested_collections(self):
         """Test nested collections of objects."""
+
         class Tag(Classno):
             name: str
             color: str = "blue"
@@ -158,7 +177,10 @@ class TestComplexNestedStructures:
 
         # Create complex nested collections
         tech_tags = [Tag(name="Python", color="yellow"), Tag(name="AI", color="green")]
-        science_tags = [Tag(name="Research", color="red"), Tag(name="Data", color="purple")]
+        science_tags = [
+            Tag(name="Research", color="red"),
+            Tag(name="Data", color="purple"),
+        ]
 
         tech_category = Category(name="Technology", tags=tech_tags)
         science_category = Category(name="Science", tags=science_tags)
@@ -167,20 +189,20 @@ class TestComplexNestedStructures:
             title="Python AI Tutorial",
             content="Learn AI with Python...",
             categories=[tech_category],
-            metadata={"author": "John Doe", "keywords": ["python", "ai", "tutorial"]}
+            metadata={"author": "John Doe", "keywords": ["python", "ai", "tutorial"]},
         )
 
         article2 = Article(
             title="Data Science Research",
             content="Latest in data science...",
             categories=[science_category, tech_category],
-            metadata={"author": "Jane Smith", "keywords": ["data", "science"]}
+            metadata={"author": "Jane Smith", "keywords": ["data", "science"]},
         )
 
         blog = Blog(
             name="Tech Blog",
             articles=[article1, article2],
-            categories=[tech_category, science_category]
+            categories=[tech_category, science_category],
         )
 
         # Verify complex nested access
@@ -195,10 +217,11 @@ class TestComplexNestedStructures:
 
     def test_cyclic_references(self):
         """Test handling of cyclic references in nested structures."""
+
         class Node(Classno):
             value: str
-            children: List['Node'] = field(default_factory=list)
-            parent: Optional['Node'] = None
+            children: List["Node"] = field(default_factory=list)
+            parent: Optional["Node"] = None
 
         # Create a tree structure
         root = Node(value="root")
@@ -221,6 +244,7 @@ class TestComplexNestedStructures:
 
     def test_nested_immutable_structures(self):
         """Test nested structures with immutable features."""
+
         class ImmutablePoint(Classno):
             __features__ = Features.IMMUTABLE
             x: float
@@ -237,7 +261,7 @@ class TestComplexNestedStructures:
             ImmutablePoint(x=0.0, y=0.0),
             ImmutablePoint(x=10.0, y=0.0),
             ImmutablePoint(x=10.0, y=10.0),
-            ImmutablePoint(x=0.0, y=10.0)
+            ImmutablePoint(x=0.0, y=10.0),
         ]
         shape = ImmutableShape(name="Square", points=points, area=100.0)
 
@@ -250,6 +274,7 @@ class TestComplexNestedStructures:
 
     def test_nested_with_custom_comparison(self):
         """Test nested structures with custom comparison keys."""
+
         class PersonWithId(Classno):
             __hash_keys__ = {"id"}
             __eq_keys__ = {"id"}
@@ -270,7 +295,9 @@ class TestComplexNestedStructures:
         person3 = PersonWithId(id=1, name="Alice Updated", age=26)  # Same ID as person1
 
         team1 = Team(name="Team A", members=[person1, person2])
-        team2 = Team(name="Team A", members=[person3, person2])  # person3 has same ID as person1
+        team2 = Team(
+            name="Team A", members=[person3, person2]
+        )  # person3 has same ID as person1
 
         # person1 and person3 should be equal based on ID
         assert person1 == person3
@@ -280,6 +307,7 @@ class TestComplexNestedStructures:
 
     def test_complex_nested_factory_defaults(self):
         """Test nested structures with complex default factories."""
+
         class Settings(Classno):
             debug: bool = False
             max_connections: int = 100
@@ -309,8 +337,12 @@ class TestComplexNestedStructures:
         assert app.databases["primary"].settings.debug is False
 
         # Add configured database
-        custom_settings = Settings(debug=True, max_connections=200, features=["caching", "logging"])
-        app.databases["secondary"] = Database(host="remote", port=3306, settings=custom_settings)
+        custom_settings = Settings(
+            debug=True, max_connections=200, features=["caching", "logging"]
+        )
+        app.databases["secondary"] = Database(
+            host="remote", port=3306, settings=custom_settings
+        )
 
         assert app.databases["secondary"].host == "remote"
         assert app.databases["secondary"].settings.debug is True
@@ -318,6 +350,7 @@ class TestComplexNestedStructures:
 
     def test_nested_optional_chains(self):
         """Test nested optional chains and None handling."""
+
         class Profile(Classno):
             bio: Optional[str] = None
             avatar_url: Optional[str] = None

@@ -67,6 +67,7 @@ class TestCastingReturns:
 
     def test_cast_list_failure(self):
         """Test that failed list casting raises TypeError."""
+
         # Create an object that cannot be converted to str
         class UncastableObject:
             def __str__(self):
@@ -83,6 +84,7 @@ class TestCastingReturns:
 
     def test_cast_dict_failure(self):
         """Test that failed dict casting raises TypeError."""
+
         # Create an object that cannot be converted to str
         class UncastableObject:
             def __str__(self):
@@ -145,10 +147,12 @@ class TestCastingReturns:
 
     def test_cast_union_failure(self):
         """Test that failed union casting raises TypeError with descriptive message."""
+
         # Create an object that cannot be converted to int or str
         class UncastableObject:
             def __str__(self):
                 raise TypeError("Cannot convert to string")
+
             def __int__(self):
                 raise TypeError("Cannot convert to int")
 
@@ -169,6 +173,7 @@ class TestCastingReturns:
 
     def test_cast_unknown_origin_with_fallback(self):
         """Test that unknown collection types fall back to collection casting."""
+
         # This would be a custom collection type that inherits from an iterable
         class CustomList(list):
             pass
@@ -188,11 +193,11 @@ class TestCastingReturns:
         """Test that cast_value never returns None implicitly."""
         # Test various scenarios to ensure no None returns
         test_cases = [
-            (42, int),           # Already correct type
-            ("42", int),         # Simple casting
-            ([1, 2], List[str]), # Collection casting
+            (42, int),  # Already correct type
+            ("42", int),  # Simple casting
+            ([1, 2], List[str]),  # Collection casting
             ({"a": 1}, Dict[str, int]),  # Dict casting
-            ((1, 2), Tuple[str, str]),   # Tuple casting
+            ((1, 2), Tuple[str, str]),  # Tuple casting
         ]
 
         for value, hint in test_cases:
@@ -201,19 +206,21 @@ class TestCastingReturns:
 
     def test_cast_error_paths_raise_exceptions(self):
         """Test that all error paths raise appropriate exceptions."""
+
         # Create an object that cannot be converted
         class UncastableObject:
             def __str__(self):
                 raise TypeError("Cannot convert to string")
+
             def __int__(self):
                 raise TypeError("Cannot convert to int")
 
         error_cases = [
-            ("not_a_number", int),           # Simple type error - should raise ValueError
-            ([UncastableObject()], List[str]),         # Collection element error
-            ({1: UncastableObject()}, Dict[str, str]), # Dict value error
-            ((1, 2, 3), Tuple[str, str]),   # Tuple length error
-            (UncastableObject(), Union[int, str]),     # Union error
+            ("not_a_number", int),  # Simple type error - should raise ValueError
+            ([UncastableObject()], List[str]),  # Collection element error
+            ({1: UncastableObject()}, Dict[str, str]),  # Dict value error
+            ((1, 2, 3), Tuple[str, str]),  # Tuple length error
+            (UncastableObject(), Union[int, str]),  # Union error
         ]
 
         for value, hint in error_cases:

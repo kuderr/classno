@@ -26,11 +26,12 @@ class TestPhase1BugFixes:
     def test_equality_comparison_bug_fix(self):
         """
         Regression test for Bug #1 - Equality comparison bug.
-        
+
         Previously: obj1 == obj2 would return True even when values were different
         due to incorrect use of getattr(self, key)() instead of getattr(other, key)()
         in _dunders.py:55
         """
+
         class TestClass(Classno):
             __features__ = Features.EQ
             value: int
@@ -49,10 +50,11 @@ class TestPhase1BugFixes:
     def test_optional_type_validation_bug_fix(self):
         """
         Regression test for Bug #2 - Optional type validation bug.
-        
+
         Previously: Optional[str] = None would fail validation
         Fixed: Proper Union type validation logic handles None values correctly
         """
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             optional_string: Optional[str] = None
@@ -74,10 +76,11 @@ class TestPhase1BugFixes:
     def test_missing_collection_type_handlers_bug_fix(self):
         """
         Regression test for Bug #3 - Missing validation/casting handlers.
-        
+
         Previously: frozenset, deque, etc. would raise KeyError
         Fixed: Added handlers for all common collection types
         """
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             frozenset_field: frozenset[str]
@@ -92,7 +95,7 @@ class TestPhase1BugFixes:
             deque_field=collections.deque([1, 2, 3]),
             defaultdict_field=collections.defaultdict(int, {"a": 1, "b": 2}),
             ordered_dict_field=collections.OrderedDict([("x", "1"), ("y", "2")]),
-            counter_field=collections.Counter(["a", "a", "b"])
+            counter_field=collections.Counter(["a", "a", "b"]),
         )
 
         assert obj.frozenset_field == frozenset(["a", "b", "c"])
@@ -102,10 +105,11 @@ class TestPhase1BugFixes:
     def test_casting_with_collection_types_bug_fix(self):
         """
         Regression test for casting with new collection types.
-        
+
         Previously: Casting to frozenset, deque, etc. would fail
         Fixed: Added casting handlers for these types
         """
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             frozenset_field: frozenset[str]
@@ -114,7 +118,7 @@ class TestPhase1BugFixes:
         # Should cast from other iterable types
         obj = TestClass(
             frozenset_field=["a", "b", "c"],  # List -> frozenset
-            deque_field=[1, 2, 3]  # List -> deque
+            deque_field=[1, 2, 3],  # List -> deque
         )
 
         assert obj.frozenset_field == frozenset(["a", "b", "c"])
@@ -128,17 +132,19 @@ class TestPhase2BugFixes:
     def test_mutable_defaults_bug_fix(self):
         """
         Regression test for Bug #4 - Shared mutable defaults.
-        
+
         Previously: field: List[str] = [] would be shared between instances
         Fixed: Added validation that prevents mutable defaults, requires default_factory
         """
         # This should now raise an error instead of creating shared state
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class BadClass(Classno):
                 __features__ = Features.EQ
                 items: List[str] = []  # Should raise error
 
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class BadDictClass(Classno):
                 __features__ = Features.EQ
                 mapping: Dict[str, int] = {}  # Should raise error
@@ -162,10 +168,11 @@ class TestPhase2BugFixes:
     def test_tuple_keys_type_preservation_bug_fix(self):
         """
         Regression test for tuple keys type preservation.
-        
+
         Previously: __eq_keys__, __order_keys__, __hash_keys__ were set[str]
         Fixed: Changed to tuple[str, ...] to preserve order
         """
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.ORDER | Features.HASH
             __eq_keys__ = ("id", "name")
@@ -195,7 +202,7 @@ class TestPhase2BugFixes:
     def test_casting_return_values_bug_fix(self):
         """
         Regression test for Bug #5 - Casting implicit None returns.
-        
+
         Previously: cast_value() could return None implicitly in some code paths
         Fixed: All code paths now have explicit returns or raise exceptions
         """
@@ -226,7 +233,7 @@ class TestPhase2BugFixes:
     def test_union_none_handling_bug_fix(self):
         """
         Regression test for Union None handling in casting.
-        
+
         Previously: None values in Union types would be cast to strings like "None"
         Fixed: Special handling for None values in Union types
         """
@@ -250,7 +257,7 @@ class TestPhase2BugFixes:
     def test_dict_casting_keys_and_values_bug_fix(self):
         """
         Regression test for dict casting bug.
-        
+
         Previously: Dict casting only validated keys, didn't cast them
         Fixed: Dict casting now casts both keys and values
         """
@@ -271,8 +278,14 @@ class TestComprehensiveRegressionScenarios:
 
     def test_complex_scenario_with_all_fixes(self):
         """Test a complex scenario using all the fixed functionality."""
+
         class ComplexClass(Classno):
-            __features__ = Features.EQ | Features.ORDER | Features.VALIDATION | Features.LOSSY_AUTOCAST
+            __features__ = (
+                Features.EQ
+                | Features.ORDER
+                | Features.VALIDATION
+                | Features.LOSSY_AUTOCAST
+            )
             __eq_keys__ = ("id",)  # Tuple type
             __order_keys__ = ("priority", "name")  # Tuple type
 
@@ -280,7 +293,9 @@ class TestComprehensiveRegressionScenarios:
             name: str
             priority: int
             optional_data: Optional[Dict[str, List[str]]] = None
-            items: frozenset[str] = field(default_factory=frozenset)  # No mutable defaults
+            items: frozenset[str] = field(
+                default_factory=frozenset
+            )  # No mutable defaults
             metadata: collections.deque[int] = field(default_factory=collections.deque)
 
         # Should work with casting and validation
@@ -290,7 +305,7 @@ class TestComprehensiveRegressionScenarios:
             priority="5",  # Will be cast to int
             optional_data={"group": ["a", "b"]},
             items=["x", "y", "z"],  # Will be cast to frozenset
-            metadata=["1", "2", "3"]  # Will be cast to deque of ints
+            metadata=["1", "2", "3"],  # Will be cast to deque of ints
         )
 
         assert obj1.id == 1
@@ -304,7 +319,7 @@ class TestComprehensiveRegressionScenarios:
             id=1,  # Same id
             name="different",  # Different name
             priority=10,  # Different priority
-            optional_data=None  # Different optional data
+            optional_data=None,  # Different optional data
         )
 
         # Should be equal based on id only
@@ -326,13 +341,16 @@ class TestComprehensiveRegressionScenarios:
 
     def test_inheritance_with_all_fixes(self):
         """Test inheritance scenarios with all bug fixes."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ | Features.VALIDATION
             __eq_keys__ = ("id",)  # Tuple type
 
             id: int
             base_optional: Optional[str] = None
-            base_collection: Set[str] = field(default_factory=set)  # No mutable defaults
+            base_collection: Set[str] = field(
+                default_factory=set
+            )  # No mutable defaults
 
         class ExtendedClass(BaseClass):
             __features__ = Features.EQ | Features.VALIDATION | Features.LOSSY_AUTOCAST
@@ -348,7 +366,7 @@ class TestComprehensiveRegressionScenarios:
             base_optional=None,  # Optional handling
             version="2",  # Cast to int
             extended_optional=[1, 2, 3],
-            extended_collection=[4, 5, 6]  # Cast to frozenset
+            extended_collection=[4, 5, 6],  # Cast to frozenset
         )
 
         assert obj.id == 1
@@ -359,6 +377,7 @@ class TestComprehensiveRegressionScenarios:
 
     def test_edge_case_combinations(self):
         """Test edge case combinations that previously might have failed."""
+
         class EdgeCaseClass(Classno):
             __features__ = Features.EQ | Features.VALIDATION | Features.LOSSY_AUTOCAST
 
@@ -376,7 +395,7 @@ class TestComprehensiveRegressionScenarios:
         obj = EdgeCaseClass(
             complex_union=[1, 2, 3],  # List[int] from union
             nested_optional={"group": ["a", "b"], "empty": None},
-            special_collections=(["x", "y"], [10, 20])  # Will be cast appropriately
+            special_collections=(["x", "y"], [10, 20]),  # Will be cast appropriately
         )
 
         assert obj.complex_union == [1, 2, 3]

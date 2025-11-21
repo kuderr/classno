@@ -15,6 +15,7 @@ class TestActualWorkingFeatures:
 
     def test_basic_creation_and_assignment(self):
         """Test basic object creation and field assignment."""
+
         class SimpleUser(Classno):
             name: str
             age: int = 0
@@ -33,6 +34,7 @@ class TestActualWorkingFeatures:
 
     def test_validation_feature(self):
         """Test validation feature with basic types."""
+
         class ValidatedUser(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -52,6 +54,7 @@ class TestActualWorkingFeatures:
 
     def test_lossy_autocast_feature(self):
         """Test lossy autocast functionality."""
+
         class AutoCastUser(Classno):
             __features__ = Features.LOSSY_AUTOCAST
             name: str
@@ -61,11 +64,12 @@ class TestActualWorkingFeatures:
         # Should autocast types
         user = AutoCastUser(name=123, age=25.7, score=95)
         assert user.name == "123"  # int to str
-        assert user.age == 25      # float to int (truncated)
+        assert user.age == 25  # float to int (truncated)
         assert user.score == 95.0  # int to float
 
     def test_frozen_feature(self):
         """Test frozen (immutable) feature."""
+
         class FrozenUser(Classno):
             __features__ = Features.FROZEN
             name: str
@@ -83,6 +87,7 @@ class TestActualWorkingFeatures:
 
     def test_private_feature(self):
         """Test private field functionality."""
+
         class PrivateUser(Classno):
             __features__ = Features.PRIVATE
             name: str
@@ -103,6 +108,7 @@ class TestActualWorkingFeatures:
 
     def test_hash_feature(self):
         """Test hash functionality."""
+
         class HashableUser(Classno):
             __features__ = Features.HASH
             name: str
@@ -119,6 +125,7 @@ class TestActualWorkingFeatures:
 
     def test_eq_feature(self):
         """Test equality functionality."""
+
         class EqualUser(Classno):
             __features__ = Features.EQ
             name: str
@@ -129,8 +136,9 @@ class TestActualWorkingFeatures:
         user3 = EqualUser(name="Jane", age=25)
 
         # Test equality (behavior may depend on implementation)
-        # Some implementations may always consider objects equal if they're instances of the same class
-        # or may have different equality semantics
+        # Some implementations may always consider objects equal if
+        # they're instances of the same class or may have different
+        # equality semantics
         result1 = user1 == user2
         result2 = user1 == user3
 
@@ -140,6 +148,7 @@ class TestActualWorkingFeatures:
 
     def test_order_feature(self):
         """Test ordering functionality."""
+
         class OrderedUser(Classno):
             __features__ = Features.ORDER
             name: str
@@ -157,6 +166,7 @@ class TestActualWorkingFeatures:
 
     def test_slots_feature(self):
         """Test slots functionality."""
+
         class SlottedUser(Classno):
             __features__ = Features.SLOTS
             name: str
@@ -165,7 +175,7 @@ class TestActualWorkingFeatures:
         user = SlottedUser(name="John", age=30)
 
         # Should have __slots__
-        assert hasattr(SlottedUser, '__slots__')
+        assert hasattr(SlottedUser, "__slots__")
 
         # Should work normally
         assert user.name == "John"
@@ -173,6 +183,7 @@ class TestActualWorkingFeatures:
 
     def test_immutable_feature(self):
         """Test IMMUTABLE feature (combines multiple features)."""
+
         class ImmutableUser(Classno):
             __features__ = Features.IMMUTABLE
             name: str
@@ -185,10 +196,11 @@ class TestActualWorkingFeatures:
             user.name = "Jane"
 
         # Should have slots
-        assert hasattr(ImmutableUser, '__slots__')
+        assert hasattr(ImmutableUser, "__slots__")
 
     def test_custom_hash_keys(self):
         """Test custom hash keys."""
+
         class CustomHashUser(Classno):
             __hash_keys__ = {"id"}
             __features__ = Features.HASH
@@ -198,7 +210,9 @@ class TestActualWorkingFeatures:
             age: int
 
         user1 = CustomHashUser(id=1, name="John", age=30)
-        user2 = CustomHashUser(id=1, name="Jane", age=25)  # Same ID, different other fields
+        user2 = CustomHashUser(
+            id=1, name="Jane", age=25
+        )  # Same ID, different other fields
         user3 = CustomHashUser(id=2, name="John", age=30)  # Different ID
 
         # Hash should be based only on ID
@@ -211,6 +225,7 @@ class TestActualWorkingFeatures:
 
     def test_custom_eq_keys(self):
         """Test custom equality keys."""
+
         class CustomEqUser(Classno):
             __eq_keys__ = {"id"}
             __features__ = Features.EQ
@@ -220,7 +235,9 @@ class TestActualWorkingFeatures:
             age: int
 
         user1 = CustomEqUser(id=1, name="John", age=30)
-        user2 = CustomEqUser(id=1, name="Jane", age=25)  # Same ID, different other fields
+        user2 = CustomEqUser(
+            id=1, name="Jane", age=25
+        )  # Same ID, different other fields
         user3 = CustomEqUser(id=2, name="John", age=30)  # Different ID
 
         # Custom equality keys may not work as expected in this implementation
@@ -238,6 +255,7 @@ class TestActualWorkingFeatures:
 
     def test_nested_objects(self):
         """Test basic nested object functionality."""
+
         class Address(Classno):
             street: str
             city: str
@@ -255,6 +273,7 @@ class TestActualWorkingFeatures:
 
     def test_complex_types_basic(self):
         """Test basic functionality with complex types."""
+
         class ComplexUser(Classno):
             name: str
             scores: List[int] = field(default_factory=list)
@@ -269,13 +288,14 @@ class TestActualWorkingFeatures:
         user2 = ComplexUser(
             name="Jane",
             scores=[95, 87, 92],
-            metadata={"role": "admin", "team": "engineering"}
+            metadata={"role": "admin", "team": "engineering"},
         )
         assert user2.scores == [95, 87, 92]
         assert user2.metadata["role"] == "admin"
 
     def test_validation_with_complex_types(self):
         """Test validation with complex types."""
+
         class ValidatedComplex(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -292,6 +312,7 @@ class TestActualWorkingFeatures:
 
     def test_inheritance_basic(self):
         """Test basic inheritance functionality."""
+
         class Animal(Classno):
             name: str
             species: str
@@ -306,6 +327,7 @@ class TestActualWorkingFeatures:
 
     def test_feature_combinations(self):
         """Test combining multiple features."""
+
         class CombinedUser(Classno):
             __features__ = Features.VALIDATION | Features.FROZEN | Features.EQ
             name: str
@@ -327,6 +349,7 @@ class TestActualWorkingFeatures:
 
     def test_optional_fields(self):
         """Test optional field handling."""
+
         class OptionalUser(Classno):
             name: str
             email: Optional[str] = None

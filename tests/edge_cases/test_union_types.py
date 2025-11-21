@@ -23,6 +23,7 @@ class TestUnionTypesEdgeCases:
 
     def test_simple_union_types(self):
         """Test basic Union types with primitive types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             flexible_value: Union[str, int]
@@ -49,6 +50,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_with_casting(self):
         """Test Union types with casting enabled."""
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             str_or_int: Union[str, int]
@@ -58,7 +60,7 @@ class TestUnionTypesEdgeCases:
         obj1 = TestClass(str_or_int="123")  # String - no casting needed
         assert obj1.str_or_int == "123"
 
-        obj2 = TestClass(str_or_int=456)    # Int - no casting needed
+        obj2 = TestClass(str_or_int=456)  # Int - no casting needed
         assert obj2.str_or_int == 456
 
         # More complex casting scenarios
@@ -68,36 +70,35 @@ class TestUnionTypesEdgeCases:
 
     def test_complex_union_types(self):
         """Test complex Union types with collections."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             list_or_dict: Union[List[str], Dict[str, int]]
             set_or_tuple: Union[Set[int], Tuple[int, ...]]
 
         # List case
-        obj1 = TestClass(
-            list_or_dict=["a", "b", "c"],
-            set_or_tuple={1, 2, 3}
-        )
+        obj1 = TestClass(list_or_dict=["a", "b", "c"], set_or_tuple={1, 2, 3})
         assert obj1.list_or_dict == ["a", "b", "c"]
         assert obj1.set_or_tuple == {1, 2, 3}
 
         # Dict case
         obj2 = TestClass(
             list_or_dict={"x": 1, "y": 2},
-            set_or_tuple=(1, 2, 3, 1, 2)  # Tuple allows duplicates
+            set_or_tuple=(1, 2, 3, 1, 2),  # Tuple allows duplicates
         )
         assert obj2.list_or_dict == {"x": 1, "y": 2}
         assert obj2.set_or_tuple == (1, 2, 3, 1, 2)
 
     def test_nested_union_types(self):
         """Test deeply nested Union types."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Union of collections containing unions
             complex_field: Union[
                 List[Union[str, int]],
                 Dict[str, Union[bool, float]],
-                Set[Union[str, int]]
+                Set[Union[str, int]],
             ]
 
         # List of mixed types
@@ -114,6 +115,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_with_custom_classes(self):
         """Test Union types with custom classes."""
+
         class TypeA(Classno):
             __features__ = Features.EQ
             a_field: str
@@ -144,6 +146,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_with_none_variations(self):
         """Test various ways to express unions with None."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Different ways to express optional unions
@@ -157,9 +160,7 @@ class TestUnionTypesEdgeCases:
         assert obj1.union_with_none is None
 
         obj2 = TestClass(
-            optional_style="test",
-            explicit_union=42,
-            union_with_none="value"
+            optional_style="test", explicit_union=42, union_with_none="value"
         )
         assert obj2.optional_style == "test"
         assert obj2.explicit_union == 42
@@ -167,6 +168,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_ordering_priority(self):
         """Test Union type matching priority."""
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             # Order matters in Union types
@@ -176,9 +178,9 @@ class TestUnionTypesEdgeCases:
 
         # String representations
         obj = TestClass(
-            str_first="123",   # Should remain string
-            int_first="456",   # Should remain string (or be cast to int)
-            bool_vs_int=True   # Should be bool
+            str_first="123",  # Should remain string
+            int_first="456",  # Should remain string (or be cast to int)
+            bool_vs_int=True,  # Should be bool
         )
 
         assert isinstance(obj.str_first, str)
@@ -187,6 +189,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_validation_edge_cases(self):
         """Test validation edge cases with Union types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             strict_union: Union[int, str]
@@ -196,9 +199,9 @@ class TestUnionTypesEdgeCases:
         TestClass(strict_union="test")
 
         # Edge cases that might be problematic
-        TestClass(strict_union="")     # Empty string
-        TestClass(strict_union=0)      # Zero
-        TestClass(strict_union=-1)     # Negative number
+        TestClass(strict_union="")  # Empty string
+        TestClass(strict_union=0)  # Zero
+        TestClass(strict_union=-1)  # Negative number
 
     def test_union_with_generics(self):
         """Test Union types with generic parameters."""
@@ -225,6 +228,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_equality_and_hashing(self):
         """Test equality and hashing with Union fields."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.HASH
             name: str
@@ -249,26 +253,27 @@ class TestUnionTypesEdgeCases:
 
     def test_union_with_inheritance(self):
         """Test Union types in inheritance scenarios."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ
             base_union: Union[str, int] = "default"
 
         class DerivedClass(BaseClass):
-            derived_union: Union[List[str], Dict[str, int]] = field(default_factory=list)
+            derived_union: Union[List[str], Dict[str, int]] = field(
+                default_factory=list
+            )
 
         obj = DerivedClass()
         assert obj.base_union == "default"
         assert obj.derived_union == []
 
-        obj2 = DerivedClass(
-            base_union=42,
-            derived_union={"count": 10}
-        )
+        obj2 = DerivedClass(base_union=42, derived_union={"count": 10})
         assert obj2.base_union == 42
         assert obj2.derived_union == {"count": 10}
 
     def test_union_type_narrowing(self):
         """Test type narrowing patterns with Union fields."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             value: Union[str, int, List[str], None] = None
@@ -287,6 +292,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_serialization_patterns(self):
         """Test Union types in serialization-like scenarios."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Common pattern: field can be an ID (int) or a full object (dict)
@@ -302,24 +308,25 @@ class TestUnionTypesEdgeCases:
         # Reference as full object
         obj2 = TestClass(
             reference={"id": 42, "name": "Object", "type": "full"},
-            data=["raw", 123, 45.6, "mixed"]
+            data=["raw", 123, 45.6, "mixed"],
         )
         assert obj2.reference == {"id": 42, "name": "Object", "type": "full"}
         assert obj2.data == ["raw", 123, 45.6, "mixed"]
 
     def test_union_performance_edge_cases(self, performance_data):
         """Test Union performance with large data sets."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             large_data: Union[List[int], Dict[str, str]]
 
         # Large list
-        large_list = performance_data['large_list']
+        large_list = performance_data["large_list"]
         obj1 = TestClass(large_data=large_list)
         assert obj1.large_data == large_list
 
         # Large dict
-        large_dict = performance_data['large_dict']
+        large_dict = performance_data["large_dict"]
         obj2 = TestClass(large_data=large_dict)
         assert obj2.large_data == large_dict
 
@@ -328,6 +335,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_error_handling(self):
         """Test error handling with Union types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             limited_union: Union[str, int]
@@ -342,7 +350,7 @@ class TestUnionTypesEdgeCases:
         from classno.exceptions import ValidationError
 
         try:
-            obj = TestClass(limited_union=[1, 2, 3])  # List not in union
+            _ = TestClass(limited_union=[1, 2, 3])  # List not in union
             # If this succeeds, casting/coercion is happening
         except (TypeError, ValueError, ValidationError):
             # Validation correctly rejected the invalid type
@@ -357,7 +365,7 @@ class TestUnionTypesEdgeCases:
             __features__ = Features.EQ
             value: str
             # Forward reference to self type
-            child: Union['NodeClass', None] = None
+            child: Union["NodeClass", None] = None
 
         root = NodeClass(value="root")
         assert root.child is None
@@ -369,6 +377,7 @@ class TestUnionTypesEdgeCases:
 
     def test_union_boundary_conditions(self):
         """Test boundary conditions for Union types."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Edge cases
@@ -377,14 +386,14 @@ class TestUnionTypesEdgeCases:
 
         obj1 = TestClass(
             single_union="only_option",
-            empty_or_value=""  # Empty string
+            empty_or_value="",  # Empty string
         )
         assert obj1.single_union == "only_option"
         assert obj1.empty_or_value == ""
 
         obj2 = TestClass(
             single_union="test",
-            empty_or_value=[]  # Empty list
+            empty_or_value=[],  # Empty list
         )
         assert obj2.single_union == "test"
         assert obj2.empty_or_value == []

@@ -22,6 +22,7 @@ class TestInheritanceScenarios:
 
     def test_basic_inheritance(self):
         """Test basic single inheritance."""
+
         class Animal(Classno):
             __features__ = Features.EQ | Features.REPR
             name: str
@@ -43,6 +44,7 @@ class TestInheritanceScenarios:
 
     def test_feature_inheritance_and_extension(self):
         """Test inheriting and extending features."""
+
         class Base(Classno):
             __features__ = Features.EQ
             id: int
@@ -57,21 +59,22 @@ class TestInheritanceScenarios:
 
         # Should have all features
         assert obj1 != obj2  # EQ
-        assert obj1 < obj2   # ORDER
+        assert obj1 < obj2  # ORDER
         assert hash(obj1) != hash(obj2)  # HASH
 
     def test_custom_keys_inheritance(self):
         """Test inheritance of custom keys."""
+
         class Base(Classno):
             __features__ = Features.EQ | Features.HASH
-            __eq_keys__ = ('id',)
-            __hash_keys__ = ('id',)
+            __eq_keys__ = ("id",)
+            __hash_keys__ = ("id",)
             id: int
             name: str
 
         class Extended(Base):
-            __eq_keys__ = ('id', 'version')  # Override parent keys
-            __hash_keys__ = ('id',)  # Keep parent hash keys
+            __eq_keys__ = ("id", "version")  # Override parent keys
+            __hash_keys__ = ("id",)  # Keep parent hash keys
             version: int
 
         obj1 = Extended(id=1, name="test", version=1)
@@ -87,6 +90,7 @@ class TestInheritanceScenarios:
 
     def test_field_inheritance(self):
         """Test field inheritance including defaults."""
+
         class Base(Classno):
             __features__ = Features.EQ
             name: str
@@ -113,6 +117,7 @@ class TestInheritanceScenarios:
 
     def test_multiple_inheritance(self):
         """Test multiple inheritance scenarios."""
+
         class Mixin1(Classno):
             __features__ = Features.EQ
             mixin1_field: str = "mixin1"
@@ -135,11 +140,12 @@ class TestInheritanceScenarios:
         # Should have combined features
         obj2 = Combined(main_field="main")
         assert obj == obj2  # EQ
-        assert repr(obj)    # REPR
+        assert repr(obj)  # REPR
         assert obj <= obj2  # ORDER
 
     def test_deep_inheritance_chain(self):
         """Test deep inheritance chains."""
+
         class Level0(Classno):
             __features__ = Features.EQ
             level0_field: str = "level0"
@@ -169,6 +175,7 @@ class TestInheritanceScenarios:
 
     def test_inheritance_with_validation(self):
         """Test inheritance with validation features."""
+
         class ValidatedBase(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             name: str
@@ -195,6 +202,7 @@ class TestInheritanceScenarios:
 
     def test_inheritance_with_casting(self):
         """Test inheritance with casting features."""
+
         class CastingBase(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             name: str
@@ -209,7 +217,7 @@ class TestInheritanceScenarios:
             name=123,  # Cast to string
             numbers=["1", "2", "3"],  # Cast to List[int]
             mapping={"a": "10", "b": "20"},  # Cast values to int
-            flexible=42  # Union allows int
+            flexible=42,  # Union allows int
         )
 
         assert obj.name == "123"
@@ -219,6 +227,7 @@ class TestInheritanceScenarios:
 
     def test_inheritance_with_frozen(self):
         """Test inheritance with frozen feature."""
+
         class FrozenBase(Classno):
             __features__ = Features.FROZEN | Features.EQ
             name: str
@@ -237,6 +246,7 @@ class TestInheritanceScenarios:
 
     def test_inheritance_with_private_fields(self):
         """Test inheritance with private field handling."""
+
         class PrivateBase(Classno):
             __features__ = Features.PRIVATE | Features.REPR | Features.EQ
             public_field: str
@@ -252,7 +262,7 @@ class TestInheritanceScenarios:
             _protected_field="protected",
             _private_field="private",
             extended_public="ext_public",
-            _extended_protected="ext_protected"
+            _extended_protected="ext_protected",
         )
 
         # Repr should handle private fields properly
@@ -264,10 +274,11 @@ class TestInheritanceScenarios:
 
     def test_abstract_like_inheritance(self):
         """Test abstract-like base class patterns."""
+
         class AbstractBase(Classno):
             __features__ = Features.EQ | Features.ORDER
-            __eq_keys__ = ('name',)  # Only compare by name for equality
-            __order_keys__ = ('name',)
+            __eq_keys__ = ("name",)  # Only compare by name for equality
+            __order_keys__ = ("name",)
 
             name: str
 
@@ -291,6 +302,7 @@ class TestInheritanceScenarios:
 
     def test_inheritance_with_slots(self):
         """Test inheritance with slots feature."""
+
         class SlotsBase(Classno):
             __features__ = Features.SLOTS | Features.EQ
             base_field: str
@@ -301,7 +313,7 @@ class TestInheritanceScenarios:
         obj = SlotsExtended(base_field="test", extended_field=42)
 
         # Should use slots
-        assert not hasattr(obj, '__dict__')
+        assert not hasattr(obj, "__dict__")
 
         # Should have all fields accessible
         assert obj.base_field == "test"
@@ -309,6 +321,7 @@ class TestInheritanceScenarios:
 
     def test_mixin_patterns(self):
         """Test mixin patterns with classno."""
+
         class TimestampMixin(Classno):
             __features__ = Features.EQ
             created_at: Optional[str] = None
@@ -327,7 +340,7 @@ class TestInheritanceScenarios:
             name="test",
             data=["item1", "item2"],
             created_at="2023-01-01",
-            updated_at="2023-01-02"
+            updated_at="2023-01-02",
         )
 
         # Should have all mixin functionality
@@ -338,10 +351,11 @@ class TestInheritanceScenarios:
 
     def test_complex_inheritance_hierarchy(self):
         """Test complex inheritance hierarchy with all features."""
+
         class Entity(Classno):
             __features__ = Features.EQ | Features.HASH
-            __eq_keys__ = ('id',)
-            __hash_keys__ = ('id',)
+            __eq_keys__ = ("id",)
+            __hash_keys__ = ("id",)
             id: int
             name: str
 
@@ -354,8 +368,10 @@ class TestInheritanceScenarios:
             # Inherits custom keys from Entity
 
         class User(ValidatedEntity):
-            __features__ = Features.EQ | Features.HASH | Features.VALIDATION | Features.ORDER
-            __order_keys__ = ('name', 'created_at')
+            __features__ = (
+                Features.EQ | Features.HASH | Features.VALIDATION | Features.ORDER
+            )
+            __order_keys__ = ("name", "created_at")
             email: str
             roles: List[str] = field(default_factory=list)
 
@@ -364,7 +380,7 @@ class TestInheritanceScenarios:
             name="Alice",
             created_at="2023-01-01",
             email="alice@example.com",
-            roles=["user", "admin"]
+            roles=["user", "admin"],
         )
 
         user2 = User(
@@ -372,7 +388,7 @@ class TestInheritanceScenarios:
             name="Alice Updated",  # Different name
             created_at="2023-01-02",
             email="alice.updated@example.com",
-            roles=["admin"]
+            roles=["admin"],
         )
 
         # Equality based on id only (inherited from Entity)

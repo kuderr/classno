@@ -21,6 +21,7 @@ class TestOptionalValidation:
 
     def test_optional_with_none_default(self):
         """Test Optional fields with None as default value."""
+
         class OptionalModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -37,6 +38,7 @@ class TestOptionalValidation:
 
     def test_optional_with_actual_values(self):
         """Test Optional fields with actual values."""
+
         class OptionalModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -51,6 +53,7 @@ class TestOptionalValidation:
 
     def test_new_union_syntax(self):
         """Test the new T | None syntax."""
+
         class NewSyntaxModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -69,6 +72,7 @@ class TestOptionalValidation:
 
     def test_complex_union_types(self):
         """Test complex Union types with multiple options."""
+
         class ComplexUnionModel(Classno):
             __features__ = Features.VALIDATION
             str_or_int: Union[str, int]
@@ -87,12 +91,15 @@ class TestOptionalValidation:
         assert obj2.multiple_types == 3.14
 
         # Test str_int_or_none with values
-        obj3 = ComplexUnionModel(str_or_int=99, str_int_or_none="value", multiple_types=True)
+        obj3 = ComplexUnionModel(
+            str_or_int=99, str_int_or_none="value", multiple_types=True
+        )
         assert obj3.str_int_or_none == "value"
         assert obj3.multiple_types is True
 
     def test_optional_complex_types(self):
         """Test Optional with complex types like List, Dict."""
+
         class OptionalComplexModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -111,7 +118,7 @@ class TestOptionalValidation:
             name="test",
             optional_list=["a", "b", "c"],
             optional_dict={"x": 1, "y": 2},
-            optional_tuple=(42, "hello")
+            optional_tuple=(42, "hello"),
         )
         assert obj2.optional_list == ["a", "b", "c"]
         assert obj2.optional_dict == {"x": 1, "y": 2}
@@ -119,6 +126,7 @@ class TestOptionalValidation:
 
     def test_nested_optional_types(self):
         """Test nested Optional types."""
+
         class NestedOptionalModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -136,13 +144,14 @@ class TestOptionalValidation:
         obj2 = NestedOptionalModel(
             name="test",
             optional_list_of_optionals=["hello", None, "world"],
-            optional_dict_with_optionals={"a": 1, "b": None, "c": 3}
+            optional_dict_with_optionals={"a": 1, "b": None, "c": 3},
         )
         assert obj2.optional_list_of_optionals == ["hello", None, "world"]
         assert obj2.optional_dict_with_optionals == {"a": 1, "b": None, "c": 3}
 
     def test_invalid_optional_values(self):
         """Test that invalid values still raise ValidationError."""
+
         class OptionalModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -158,6 +167,7 @@ class TestOptionalValidation:
 
     def test_invalid_union_values(self):
         """Test that invalid values for Union types raise ValidationError."""
+
         class UnionModel(Classno):
             __features__ = Features.VALIDATION
             str_or_int: Union[str, int]
@@ -172,11 +182,14 @@ class TestOptionalValidation:
 
     def test_optional_with_field_factory(self):
         """Test Optional fields with field factory defaults."""
+
         class OptionalFieldModel(Classno):
             __features__ = Features.VALIDATION
             name: str
             optional_list: Optional[List[str]] = field(default=None)
-            optional_with_factory: Optional[List[int]] = field(default_factory=lambda: None)
+            optional_with_factory: Optional[List[int]] = field(
+                default_factory=lambda: None
+            )
             required_with_factory: List[str] = field(default_factory=list)
 
         obj = OptionalFieldModel(name="test")
@@ -186,6 +199,7 @@ class TestOptionalValidation:
 
     def test_mixed_optional_and_required(self):
         """Test mixing optional and required fields."""
+
         class MixedModel(Classno):
             __features__ = Features.VALIDATION
             required_str: str
@@ -208,7 +222,7 @@ class TestOptionalValidation:
             required_int=99,
             optional_str="optional",
             optional_int=123,
-            union_field=456
+            union_field=456,
         )
         assert obj2.optional_str == "optional"
         assert obj2.optional_int == 123
@@ -216,6 +230,7 @@ class TestOptionalValidation:
 
     def test_optional_custom_classes(self):
         """Test Optional with custom Classno classes."""
+
         class Address(Classno):
             __features__ = Features.VALIDATION
             street: str
@@ -239,6 +254,7 @@ class TestOptionalValidation:
 
     def test_optional_validation_error_messages(self):
         """Test that validation error messages are helpful for Optional types."""
+
         class OptionalModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -254,6 +270,7 @@ class TestOptionalValidation:
 
     def test_union_validation_tries_all_types(self):
         """Test that Union validation tries all types in the union."""
+
         class UnionModel(Classno):
             __features__ = Features.VALIDATION
             flexible: Union[str, List[int], Dict[str, str]]
@@ -276,6 +293,7 @@ class TestOptionalValidation:
 
     def test_optional_inheritance(self):
         """Test Optional types with inheritance."""
+
         class BaseModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -294,10 +312,7 @@ class TestOptionalValidation:
 
         # Should work with values for both
         child2 = ChildModel(
-            name="test2",
-            age=30,
-            optional_base="base_value",
-            optional_child=42
+            name="test2", age=30, optional_base="base_value", optional_child=42
         )
         assert child2.optional_base == "base_value"
         assert child2.optional_child == 42

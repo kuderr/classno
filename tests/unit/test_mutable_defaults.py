@@ -22,6 +22,7 @@ class TestMutableDefaultValidation:
     def test_list_default_raises_error(self):
         """Test that using a list as default raises ValueError."""
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class TestClass(Classno):
                 __features__ = Features.EQ
                 items: List[str] = []
@@ -29,6 +30,7 @@ class TestMutableDefaultValidation:
     def test_dict_default_raises_error(self):
         """Test that using a dict as default raises ValueError."""
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class TestClass(Classno):
                 __features__ = Features.EQ
                 mapping: Dict[str, int] = {}
@@ -36,6 +38,7 @@ class TestMutableDefaultValidation:
     def test_set_default_raises_error(self):
         """Test that using a set as default raises ValueError."""
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class TestClass(Classno):
                 __features__ = Features.EQ
                 items: Set[str] = set()
@@ -43,13 +46,15 @@ class TestMutableDefaultValidation:
     def test_bytearray_default_raises_error(self):
         """Test that using a bytearray as default raises ValueError."""
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class TestClass(Classno):
                 __features__ = Features.EQ
-                data: bytearray = bytearray(b'test')
+                data: bytearray = bytearray(b"test")
 
     def test_field_list_default_raises_error(self):
         """Test that using field() with list default raises ValueError."""
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class TestClass(Classno):
                 __features__ = Features.EQ
                 items: List[str] = field(default=[])
@@ -57,12 +62,14 @@ class TestMutableDefaultValidation:
     def test_field_dict_default_raises_error(self):
         """Test that using field() with dict default raises ValueError."""
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class TestClass(Classno):
                 __features__ = Features.EQ
                 mapping: Dict[str, int] = field(default={})
 
     def test_immutable_defaults_allowed(self):
         """Test that immutable defaults are still allowed."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             name: str = "default"
@@ -74,7 +81,6 @@ class TestMutableDefaultValidation:
 
         # Should create successfully
         obj1 = TestClass()
-        obj2 = TestClass()
 
         # Verify defaults work
         assert obj1.name == "default"
@@ -86,6 +92,7 @@ class TestMutableDefaultValidation:
 
     def test_default_factory_list_works(self):
         """Test that using default_factory with list works correctly."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             items: List[str] = field(default_factory=list)
@@ -100,6 +107,7 @@ class TestMutableDefaultValidation:
 
     def test_default_factory_dict_works(self):
         """Test that using default_factory with dict works correctly."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             mapping: Dict[str, int] = field(default_factory=dict)
@@ -114,6 +122,7 @@ class TestMutableDefaultValidation:
 
     def test_default_factory_set_works(self):
         """Test that using default_factory with set works correctly."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             items: Set[str] = field(default_factory=set)
@@ -128,6 +137,7 @@ class TestMutableDefaultValidation:
 
     def test_default_factory_lambda_works(self):
         """Test that using default_factory with lambda works correctly."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             items: List[str] = field(default_factory=lambda: ["default"])
@@ -148,6 +158,7 @@ class TestMutableDefaultValidation:
     def test_error_message_provides_solution(self):
         """Test that error message provides helpful solution."""
         with pytest.raises(ValueError) as exc_info:
+
             class TestClass(Classno):
                 __features__ = Features.EQ
                 items: List[str] = ["a", "b"]
@@ -159,6 +170,7 @@ class TestMutableDefaultValidation:
 
     def test_none_default_allowed(self):
         """Test that None defaults are allowed (None is immutable)."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             optional_value: str = None
@@ -168,6 +180,7 @@ class TestMutableDefaultValidation:
 
     def test_custom_immutable_class_allowed(self):
         """Test that custom immutable classes as defaults are allowed."""
+
         class ImmutableClass:
             def __init__(self, value):
                 self._value = value

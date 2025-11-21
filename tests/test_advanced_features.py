@@ -277,7 +277,8 @@ class TestAdvancedFeatures:
         obj = MetadataClass(name="test")
 
         # The metadata should be accessible through the field definition
-        # This tests that metadata is properly stored and doesn't interfere with functionality
+        # This tests that metadata is properly stored and doesn't
+        # interfere with functionality
         assert obj.name == "test"
         assert obj.score == 0.0
         assert obj.tags == []
@@ -287,6 +288,7 @@ class TestAdvancedFeatures:
 
         # Mutable default should raise ValueError
         with pytest.raises(ValueError, match="Mutable default values are not allowed"):
+
             class BadDefaultTest(Classno):
                 # Using mutable default (should raise error)
                 shared_list: list = []

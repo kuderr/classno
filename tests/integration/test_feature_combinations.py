@@ -23,6 +23,7 @@ class TestFeatureCombinations:
 
     def test_validation_with_casting(self):
         """Test VALIDATION + LOSSY_AUTOCAST combination."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.LOSSY_AUTOCAST | Features.EQ
             name: str
@@ -37,6 +38,7 @@ class TestFeatureCombinations:
 
     def test_eq_order_hash_combination(self):
         """Test EQ + ORDER + HASH feature combination."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.ORDER | Features.HASH
             name: str
@@ -61,6 +63,7 @@ class TestFeatureCombinations:
 
     def test_frozen_with_validation(self):
         """Test FROZEN + VALIDATION combination."""
+
         class TestClass(Classno):
             __features__ = Features.FROZEN | Features.VALIDATION | Features.EQ
             name: str
@@ -76,6 +79,7 @@ class TestFeatureCombinations:
 
     def test_slots_with_hash(self):
         """Test SLOTS + HASH combination."""
+
         class TestClass(Classno):
             __features__ = Features.SLOTS | Features.HASH | Features.EQ
             name: str
@@ -87,10 +91,11 @@ class TestFeatureCombinations:
         assert hash(obj) is not None
 
         # Should use slots (no __dict__)
-        assert not hasattr(obj, '__dict__')
+        assert not hasattr(obj, "__dict__")
 
     def test_private_with_repr(self):
         """Test PRIVATE + REPR combination."""
+
         class TestClass(Classno):
             __features__ = Features.PRIVATE | Features.REPR | Features.EQ
             name: str
@@ -107,8 +112,11 @@ class TestFeatureCombinations:
 
     def test_immutable_feature_combination(self):
         """Test IMMUTABLE (combined feature)."""
+
         class TestClass(Classno):
-            __features__ = Features.IMMUTABLE  # EQ | REPR | ORDER | HASH | SLOTS | FROZEN
+            __features__ = (
+                Features.IMMUTABLE
+            )  # EQ | REPR | ORDER | HASH | SLOTS | FROZEN
             name: str
             value: int
 
@@ -120,7 +128,7 @@ class TestFeatureCombinations:
         assert repr(obj1)  # REPR
         assert obj1 <= obj2  # ORDER
         assert hash(obj1) == hash(obj2)  # HASH
-        assert not hasattr(obj1, '__dict__')  # SLOTS
+        assert not hasattr(obj1, "__dict__")  # SLOTS
 
         # Should be frozen
         with pytest.raises(AttributeError):
@@ -128,11 +136,12 @@ class TestFeatureCombinations:
 
     def test_custom_keys_with_features(self):
         """Test custom keys with various features."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.ORDER | Features.HASH
-            __eq_keys__ = ('id',)
-            __order_keys__ = ('name', 'priority')
-            __hash_keys__ = ('id',)
+            __eq_keys__ = ("id",)
+            __order_keys__ = ("name", "priority")
+            __hash_keys__ = ("id",)
 
             id: int
             name: str
@@ -155,6 +164,7 @@ class TestFeatureCombinations:
 
     def test_validation_with_optional_types(self):
         """Test validation with Optional and Union types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             name: str
@@ -172,7 +182,7 @@ class TestFeatureCombinations:
             name="test2",
             optional_count=42,
             flexible_value=100,
-            optional_list=["a", "b"]
+            optional_list=["a", "b"],
         )
         assert obj2.optional_count == 42
         assert obj2.flexible_value == 100
@@ -180,6 +190,7 @@ class TestFeatureCombinations:
 
     def test_casting_with_complex_types(self):
         """Test casting with complex nested types."""
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             nested_dict: Dict[str, List[int]] = field(default_factory=dict)
@@ -188,7 +199,7 @@ class TestFeatureCombinations:
         # Should cast nested structures
         obj = TestClass(
             nested_dict={"numbers": ["1", "2", "3"], "more": ["4", "5"]},
-            set_of_strings=[1, 2, 3, 3]  # List with duplicates -> set of strings
+            set_of_strings=[1, 2, 3, 3],  # List with duplicates -> set of strings
         )
 
         assert obj.nested_dict == {"numbers": [1, 2, 3], "more": [4, 5]}
@@ -196,10 +207,15 @@ class TestFeatureCombinations:
 
     def test_all_features_combination(self):
         """Test a class with most features enabled."""
+
         class TestClass(Classno):
             __features__ = (
-                Features.EQ | Features.ORDER | Features.HASH | Features.REPR |
-                Features.VALIDATION | Features.LOSSY_AUTOCAST
+                Features.EQ
+                | Features.ORDER
+                | Features.HASH
+                | Features.REPR
+                | Features.VALIDATION
+                | Features.LOSSY_AUTOCAST
             )
 
             name: str
@@ -219,6 +235,7 @@ class TestFeatureCombinations:
 
     def test_feature_inheritance_interaction(self):
         """Test how features interact with inheritance."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ | Features.VALIDATION
             name: str
@@ -232,17 +249,20 @@ class TestFeatureCombinations:
 
         # Should have all features from both classes
         assert obj1 != obj2  # EQ works
-        assert obj1 < obj2   # ORDER works
+        assert obj1 < obj2  # ORDER works
         # Validation should work for both base and derived fields
 
     def test_performance_with_multiple_features(self, performance_data):
         """Test performance doesn't degrade significantly with multiple features."""
+
         class TestClass(Classno):
-            __features__ = Features.EQ | Features.ORDER | Features.HASH | Features.VALIDATION
+            __features__ = (
+                Features.EQ | Features.ORDER | Features.HASH | Features.VALIDATION
+            )
             data: List[int] = field(default_factory=list)
 
         # Create objects with large data
-        large_list = performance_data['large_list']
+        large_list = performance_data["large_list"]
         obj1 = TestClass(data=large_list[:500])
         obj2 = TestClass(data=large_list[500:])
 
@@ -253,6 +273,7 @@ class TestFeatureCombinations:
 
     def test_error_handling_with_feature_combinations(self):
         """Test error handling when features are combined."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.FROZEN | Features.EQ
             name: str
@@ -269,11 +290,12 @@ class TestFeatureCombinations:
 
     def test_custom_keys_edge_cases(self):
         """Test edge cases with custom keys and features."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.ORDER | Features.HASH
             __eq_keys__ = ()  # Empty eq keys
-            __order_keys__ = ('name',)
-            __hash_keys__ = ('id',)
+            __order_keys__ = ("name",)
+            __hash_keys__ = ("id",)
 
             id: int
             name: str

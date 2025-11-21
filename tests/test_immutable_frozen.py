@@ -182,7 +182,7 @@ class TestImmutableAndFrozen:
         try:
             assert obj1 == obj2
             assert obj1 != obj3
-        except:
+        except Exception:
             # If equality isn't automatically enabled, that's fine
             pass
 
@@ -317,7 +317,7 @@ class TestImmutableAndFrozen:
         # Should be hashable (but may fail if contains unhashable types like list)
         try:
             hash1 = hash(obj1)
-            hash2 = hash(obj2)
+            _ = hash(obj2)
             assert isinstance(hash1, int)
         except TypeError:
             # If object contains unhashable types (like list), this is expected
@@ -328,6 +328,6 @@ class TestImmutableAndFrozen:
         assert not hasattr(obj1, "__dict__")
 
         # Should be usable in sets and as dict keys
-        obj_set = {obj1, obj2}
+        _ = {obj1, obj2}
         obj_dict = {obj1: "value"}
         assert obj_dict[obj2] == "value"  # Should work if hashes are equal

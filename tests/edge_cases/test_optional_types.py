@@ -22,6 +22,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_with_none_as_explicit_default(self):
         """Test Optional with explicit None default."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             required_field: str
@@ -38,6 +39,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_with_mutable_defaults_via_factory(self):
         """Test Optional mutable types using default_factory."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             name: str
@@ -55,6 +57,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_nested_optional_types(self):
         """Test deeply nested Optional types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             nested_optional: Optional[Dict[str, Optional[List[Optional[str]]]]] = None
@@ -63,17 +66,20 @@ class TestOptionalTypesEdgeCases:
         assert obj.nested_optional is None
 
         # Complex nested structure with Nones at various levels
-        obj2 = TestClass(nested_optional={
-            "group1": ["item1", None, "item3"],
-            "group2": None,
-            "group3": []
-        })
+        obj2 = TestClass(
+            nested_optional={
+                "group1": ["item1", None, "item3"],
+                "group2": None,
+                "group3": [],
+            }
+        )
         assert obj2.nested_optional["group1"] == ["item1", None, "item3"]
         assert obj2.nested_optional["group2"] is None
         assert obj2.nested_optional["group3"] == []
 
     def test_optional_with_casting(self):
         """Test Optional types with casting enabled."""
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             optional_int: Optional[int] = None
@@ -88,26 +94,21 @@ class TestOptionalTypesEdgeCases:
 
         # Values should be cast to the non-None type
         obj2 = TestClass(
-            optional_int="42",
-            optional_list=["1", "2", "3"],
-            optional_bool="true"
+            optional_int="42", optional_list=["1", "2", "3"], optional_bool="true"
         )
         assert obj2.optional_int == 42
         assert obj2.optional_list == [1, 2, 3]
         assert obj2.optional_bool is True
 
         # None values should be preserved even with casting
-        obj3 = TestClass(
-            optional_int=None,
-            optional_list=None,
-            optional_bool=None
-        )
+        obj3 = TestClass(optional_int=None, optional_list=None, optional_bool=None)
         assert obj3.optional_int is None
         assert obj3.optional_list is None
         assert obj3.optional_bool is None
 
     def test_optional_custom_classes(self):
         """Test Optional with custom class types."""
+
         class InnerClass(Classno):
             __features__ = Features.EQ
             value: int
@@ -127,6 +128,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_with_union_types(self):
         """Test Optional combined with Union types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             # Optional[Union[str, int]] is equivalent to Union[str, int, None]
@@ -148,6 +150,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_validation_edge_cases(self):
         """Test validation edge cases with Optional types."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             optional_positive_int: Optional[int] = None
@@ -165,6 +168,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_with_generics(self):
         """Test Optional with generic types."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             optional_list_of_tuples: Optional[List[Tuple[str, int]]] = None
@@ -179,7 +183,7 @@ class TestOptionalTypesEdgeCases:
         obj2 = TestClass(
             optional_list_of_tuples=[("a", 1), ("b", 2)],
             optional_dict_of_lists={"nums": [1.1, 2.2], "more": [3.3]},
-            optional_set_of_strings={"x", "y", "z"}
+            optional_set_of_strings={"x", "y", "z"},
         )
         assert obj2.optional_list_of_tuples == [("a", 1), ("b", 2)]
         assert obj2.optional_dict_of_lists == {"nums": [1.1, 2.2], "more": [3.3]}
@@ -187,6 +191,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_equality_and_hashing(self):
         """Test equality and hashing with Optional fields."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.HASH
             name: str
@@ -219,7 +224,7 @@ class TestOptionalTypesEdgeCases:
             optional_priority: Optional[int] = None
 
         obj1 = TestClass(name="alpha")  # None priority
-        obj2 = TestClass(name="beta")   # None priority
+        obj2 = TestClass(name="beta")  # None priority
         obj3 = TestClass(name="alpha", optional_priority=1)
         obj4 = TestClass(name="beta", optional_priority=2)
 
@@ -234,6 +239,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_with_inheritance(self):
         """Test Optional types in inheritance scenarios."""
+
         class BaseClass(Classno):
             __features__ = Features.EQ
             name: str
@@ -247,15 +253,14 @@ class TestOptionalTypesEdgeCases:
         assert obj.optional_derived is None
 
         obj2 = DerivedClass(
-            name="test",
-            optional_base="base_value",
-            optional_derived=42
+            name="test", optional_base="base_value", optional_derived=42
         )
         assert obj2.optional_base == "base_value"
         assert obj2.optional_derived == 42
 
     def test_optional_serialization_patterns(self):
         """Test Optional types in serialization-like scenarios."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             id: int
@@ -275,7 +280,7 @@ class TestOptionalTypesEdgeCases:
             name="child",
             metadata={"type": "document", "version": 1, "deprecated": None},
             tags=["important", "urgent"],
-            parent_id=1
+            parent_id=1,
         )
         assert obj2.metadata == {"type": "document", "version": 1, "deprecated": None}
         assert obj2.tags == ["important", "urgent"]
@@ -298,7 +303,7 @@ class TestOptionalTypesEdgeCases:
         # Note: This depends on validation implementation
         # Some might allow this with casting, others might reject
         try:
-            obj = TestClass(optional_int="not_an_int_or_none")
+            _ = TestClass(optional_int="not_an_int_or_none")
             # If this doesn't raise an error, casting is happening
             # which might be acceptable depending on features
         except (TypeError, ValueError, ValidationError):
@@ -307,6 +312,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_performance_with_large_data(self, performance_data):
         """Test Optional performance with large datasets."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             name: str
@@ -319,8 +325,8 @@ class TestOptionalTypesEdgeCases:
         assert obj1 != obj2  # Fast comparison
 
         # Objects with large data should still work
-        large_list = performance_data['large_list']
-        large_dict = performance_data['large_dict']
+        large_list = performance_data["large_list"]
+        large_dict = performance_data["large_dict"]
 
         obj3 = TestClass(name="test3", optional_large_list=large_list)
         obj4 = TestClass(name="test4", optional_large_dict=large_dict)
@@ -331,6 +337,7 @@ class TestOptionalTypesEdgeCases:
 
     def test_optional_with_default_factory_edge_case(self):
         """Test Optional with default_factory edge cases."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             name: str

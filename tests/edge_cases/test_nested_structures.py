@@ -22,20 +22,15 @@ class TestNestedStructuresEdgeCases:
 
     def test_deeply_nested_lists(self):
         """Test deeply nested list structures."""
+
         class TestClass(Classno):
             __features__ = Features.EQ | Features.VALIDATION
             # 4 levels of nesting
             nested_lists: List[List[List[List[str]]]]
 
         data = [
-            [
-                [["a", "b"], ["c", "d"]],
-                [["e", "f"], ["g", "h"]]
-            ],
-            [
-                [["i", "j"], ["k", "l"]],
-                [["m", "n"], ["o", "p"]]
-            ]
+            [[["a", "b"], ["c", "d"]], [["e", "f"], ["g", "h"]]],
+            [[["i", "j"], ["k", "l"]], [["m", "n"], ["o", "p"]]],
         ]
 
         obj = TestClass(nested_lists=data)
@@ -45,22 +40,13 @@ class TestNestedStructuresEdgeCases:
 
     def test_deeply_nested_dicts(self):
         """Test deeply nested dictionary structures."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # 5 levels of nesting
             nested_dicts: Dict[str, Dict[str, Dict[str, Dict[str, Dict[str, int]]]]]
 
-        data = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "level4": {
-                            "level5": 42
-                        }
-                    }
-                }
-            }
-        }
+        data = {"level1": {"level2": {"level3": {"level4": {"level5": 42}}}}}
 
         obj = TestClass(nested_dicts=data)
         assert obj.nested_dicts == data
@@ -68,19 +54,20 @@ class TestNestedStructuresEdgeCases:
 
     def test_mixed_nested_structures(self):
         """Test mixed nested structures (lists, dicts, tuples, sets)."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Complex mixed nesting
-            complex_nested: Dict[str, List[Tuple[Set[int], Dict[str, Optional[List[str]]]]]]
+            complex_nested: Dict[
+                str, List[Tuple[Set[int], Dict[str, Optional[List[str]]]]]
+            ]
 
         data = {
             "group1": [
                 ({1, 2, 3}, {"items": ["a", "b"], "empty": None}),
-                ({4, 5}, {"items": ["c"], "empty": []})
+                ({4, 5}, {"items": ["c"], "empty": []}),
             ],
-            "group2": [
-                (set(), {"items": None, "data": ["x", "y", "z"]})
-            ]
+            "group2": [(set(), {"items": None, "data": ["x", "y", "z"]})],
         }
 
         obj = TestClass(complex_nested=data)
@@ -95,11 +82,14 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_optional_structures(self):
         """Test nested structures with Optional at various levels."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Optional at different nesting levels
             optional_nested: Optional[Dict[str, Optional[List[Optional[str]]]]] = None
-            nested_optional: Dict[str, Optional[List[str]]] = field(default_factory=dict)
+            nested_optional: Dict[str, Optional[List[str]]] = field(
+                default_factory=dict
+            )
 
         # Completely None
         obj1 = TestClass()
@@ -111,13 +101,9 @@ class TestNestedStructuresEdgeCases:
             optional_nested={
                 "group1": ["item1", None, "item3"],
                 "group2": None,
-                "group3": []
+                "group3": [],
             },
-            nested_optional={
-                "valid": ["a", "b", "c"],
-                "empty": [],
-                "none": None
-            }
+            nested_optional={"valid": ["a", "b", "c"], "empty": [], "none": None},
         )
 
         assert obj2.optional_nested["group1"] == ["item1", None, "item3"]
@@ -126,27 +112,13 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_union_structures(self):
         """Test nested structures with Union types."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # Union at different nesting levels
             union_nested: List[Union[str, Dict[str, Union[int, List[str]]]]]
 
-        data = [
-            "simple_string",
-            {"number": 42},
-            {"list": ["a", "b", "c"]},
-            "another_string",
-            {"mixed": 100, "more_mixed": ["x", "y"]}  # This will match the first union option
-        ]
-
-        # Note: The last item might not work as expected due to dict structure
-        # Let's use a simpler example
-        simple_data = [
-            "string1",
-            {"key1": 42},
-            {"key2": ["a", "b"]},
-            "string2"
-        ]
+        simple_data = ["string1", {"key1": 42}, {"key2": ["a", "b"]}, "string2"]
 
         obj = TestClass(union_nested=simple_data)
         assert obj.union_nested[0] == "string1"
@@ -155,6 +127,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_custom_classes(self):
         """Test nesting with custom classno classes."""
+
         class InnerClass(Classno):
             __features__ = Features.EQ
             value: int
@@ -186,10 +159,11 @@ class TestNestedStructuresEdgeCases:
 
     def test_self_referencing_structures(self):
         """Test self-referencing nested structures."""
+
         class TreeNode(Classno):
             __features__ = Features.EQ
             value: str
-            children: List['TreeNode'] = field(default_factory=list)
+            children: List["TreeNode"] = field(default_factory=list)
 
         # Create a tree structure
         root = TreeNode(value="root")
@@ -207,11 +181,12 @@ class TestNestedStructuresEdgeCases:
 
     def test_circular_reference_handling(self):
         """Test handling of potential circular references."""
+
         class NodeClass(Classno):
             __features__ = Features.EQ
             name: str
-            parent: Optional['NodeClass'] = None
-            children: List['NodeClass'] = field(default_factory=list)
+            parent: Optional["NodeClass"] = None
+            children: List["NodeClass"] = field(default_factory=list)
 
         parent = NodeClass(name="parent")
         child = NodeClass(name="child", parent=parent)
@@ -224,6 +199,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_with_casting(self):
         """Test nested structures with casting enabled."""
+
         class TestClass(Classno):
             __features__ = Features.LOSSY_AUTOCAST | Features.EQ
             nested_numbers: List[List[int]]
@@ -232,7 +208,7 @@ class TestNestedStructuresEdgeCases:
         # Provide strings that should be cast to integers
         obj = TestClass(
             nested_numbers=[["1", "2"], ["3", "4", "5"]],
-            nested_mapping={"group1": {"a": "10", "b": "20"}, "group2": {"c": "30"}}
+            nested_mapping={"group1": {"a": "10", "b": "20"}, "group2": {"c": "30"}},
         )
 
         assert obj.nested_numbers == [[1, 2], [3, 4, 5]]
@@ -240,25 +216,23 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_performance_large_structures(self, performance_data):
         """Test performance with large nested structures."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             large_nested_list: List[List[int]]
             large_nested_dict: Dict[str, Dict[str, str]]
 
         # Create large nested structures
-        large_list = performance_data['large_list']
+        large_list = performance_data["large_list"]
         nested_list = [large_list[:100], large_list[100:200], large_list[200:300]]
 
-        large_dict = performance_data['large_dict']
+        large_dict = performance_data["large_dict"]
         nested_dict = {
             "section1": {k: v for k, v in list(large_dict.items())[:100]},
-            "section2": {k: v for k, v in list(large_dict.items())[100:200]}
+            "section2": {k: v for k, v in list(large_dict.items())[100:200]},
         }
 
-        obj = TestClass(
-            large_nested_list=nested_list,
-            large_nested_dict=nested_dict
-        )
+        obj = TestClass(large_nested_list=nested_list, large_nested_dict=nested_dict)
 
         # Verify structure integrity
         assert len(obj.large_nested_list) == 3
@@ -267,10 +241,13 @@ class TestNestedStructuresEdgeCases:
 
     def test_extremely_deep_nesting(self):
         """Test extremely deep nesting (within reasonable limits)."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             # 10 levels deep
-            deep_structure: List[List[List[List[List[List[List[List[List[List[str]]]]]]]]]]
+            deep_structure: List[
+                List[List[List[List[List[List[List[List[List[str]]]]]]]]]
+            ]
 
         # Create a 10-level deep structure
         deep_data = [[[[[[[[[[["deep_value"]]]]]]]]]]]
@@ -284,6 +261,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_default_factories(self):
         """Test nested structures with default factories."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             nested_lists: List[List[str]] = field(default_factory=lambda: [["default"]])
@@ -307,6 +285,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_validation_edge_cases(self):
         """Test validation edge cases with nested structures."""
+
         class TestClass(Classno):
             __features__ = Features.VALIDATION | Features.EQ
             validated_nested: List[Dict[str, int]]
@@ -324,27 +303,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_asymmetric_nested_structures(self):
         """Test asymmetric (irregular) nested structures."""
-        class TestClass(Classno):
-            __features__ = Features.EQ
-            # Irregular nesting - some branches deeper than others
-            irregular: List[Union[str, List[Union[int, List[str]]]]]
 
-        data = [
-            "simple_string",
-            [42],
-            [43, ["nested", "strings"]],
-            ["another", "level", [["deep", "list"]]],
-            "back_to_simple"
-        ]
-
-        # This is complex due to the union types, let's simplify
-        simple_irregular = [
-            "string",
-            [1, 2],
-            [3, 4, 5, 6]  # Different lengths
-        ]
-
-        # Using a simpler structure that's still irregular
         class SimpleTestClass(Classno):
             __features__ = Features.EQ
             irregular_lists: List[List[str]]
@@ -353,7 +312,7 @@ class TestNestedStructuresEdgeCases:
             ["single"],
             ["two", "items"],
             ["three", "items", "here"],
-            []  # Empty list
+            [],  # Empty list
         ]
 
         obj = SimpleTestClass(irregular_lists=irregular_data)
@@ -365,6 +324,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_mutation_independence(self):
         """Test that nested structures maintain independence between instances."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             nested_data: Dict[str, List[str]] = field(
@@ -384,6 +344,7 @@ class TestNestedStructuresEdgeCases:
 
     def test_nested_equality_edge_cases(self):
         """Test equality edge cases with nested structures."""
+
         class TestClass(Classno):
             __features__ = Features.EQ
             nested: List[Dict[str, Union[int, List[str]]]]

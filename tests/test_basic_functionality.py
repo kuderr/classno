@@ -13,10 +13,12 @@ from classno import field
 
 
 class TestBasicClassnoFunctionality:
-    """Test basic Classno functionality including creation, default values, and field configuration."""
+    """Test basic Classno functionality including creation, defaults,
+    and field configuration."""
 
     def test_simple_class_creation(self):
         """Test creating a simple Classno class with basic fields."""
+
         class User(Classno):
             name: str
             age: int = 0
@@ -29,6 +31,7 @@ class TestBasicClassnoFunctionality:
 
     def test_field_with_default_factory(self):
         """Test field with default_factory."""
+
         class Post(Classno):
             title: str
             content: str = ""
@@ -43,6 +46,7 @@ class TestBasicClassnoFunctionality:
 
     def test_field_metadata(self):
         """Test field metadata configuration."""
+
         class Model(Classno):
             name: str = field(metadata={"indexed": True, "required": True})
             description: str = field(default="", metadata={"max_length": 255})
@@ -53,6 +57,7 @@ class TestBasicClassnoFunctionality:
 
     def test_missing_required_field_raises_error(self):
         """Test that missing required fields raise appropriate errors."""
+
         class User(Classno):
             name: str
             email: str
@@ -62,6 +67,7 @@ class TestBasicClassnoFunctionality:
 
     def test_optional_fields(self):
         """Test optional field handling."""
+
         class User(Classno):
             name: str
             email: Optional[str] = None
@@ -78,6 +84,7 @@ class TestBasicClassnoFunctionality:
 
     def test_union_types(self):
         """Test Union type handling."""
+
         class FlexibleModel(Classno):
             value: Union[int, str]
             number: Union[int, float] = 0
@@ -92,6 +99,7 @@ class TestBasicClassnoFunctionality:
 
     def test_complex_types(self):
         """Test complex type annotations."""
+
         class ComplexModel(Classno):
             numbers: List[int] = field(default_factory=list)
             mapping: Dict[str, int] = field(default_factory=dict)
@@ -108,7 +116,7 @@ class TestBasicClassnoFunctionality:
             numbers=[1, 2, 3],
             mapping={"a": 1, "b": 2},
             coordinates=(10.5, 20.3),
-            tags=["python", "dataclass"]
+            tags=["python", "dataclass"],
         )
         assert model2.numbers == [1, 2, 3]
         assert model2.mapping == {"a": 1, "b": 2}
@@ -121,6 +129,7 @@ class TestFeatureConfiguration:
 
     def test_eq_feature(self):
         """Test equality comparison feature."""
+
         class Person(Classno):
             __features__ = Features.EQ
             name: str
@@ -135,6 +144,7 @@ class TestFeatureConfiguration:
 
     def test_hash_feature(self):
         """Test hash feature."""
+
         class HashableItem(Classno):
             __features__ = Features.HASH
             name: str
@@ -150,6 +160,7 @@ class TestFeatureConfiguration:
 
     def test_order_feature(self):
         """Test ordering feature."""
+
         class OrderedItem(Classno):
             __features__ = Features.ORDER
             name: str
@@ -164,6 +175,7 @@ class TestFeatureConfiguration:
 
     def test_combined_features(self):
         """Test combining multiple features."""
+
         class CombinedFeatures(Classno):
             __features__ = Features.EQ | Features.HASH | Features.ORDER
             name: str
@@ -186,6 +198,7 @@ class TestFeatureConfiguration:
 
     def test_default_features(self):
         """Test default feature combination."""
+
         class DefaultClass(Classno):
             __features__ = Features.DEFAULT
             name: str

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Tests for newly added functionality: ForwardRef, slots fixes, hash fixes, and inheritance fixes."""
+"""Tests for newly added functionality: ForwardRef, slots fixes,
+hash fixes, and inheritance fixes."""
 
 from collections import defaultdict
 from collections import deque
@@ -21,6 +22,7 @@ class TestForwardRefValidation:
 
     def test_forward_ref_self_reference(self):
         """Test ForwardRef validation with self-referential types."""
+
         class Node(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -38,6 +40,7 @@ class TestForwardRefValidation:
 
     def test_forward_ref_validation_failure(self):
         """Test that ForwardRef validation properly rejects wrong types."""
+
         class Employee(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -52,6 +55,7 @@ class TestForwardRefValidation:
 
     def test_forward_ref_in_collections(self):
         """Test ForwardRef validation within collections."""
+
         class Team(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -75,6 +79,7 @@ class TestSlotsEnhancements:
 
     def test_slots_removes_dict(self):
         """Test that slots properly removes __dict__ from instances."""
+
         class SlottedClass(Classno):
             __features__ = Features.SLOTS
             name: str
@@ -83,8 +88,8 @@ class TestSlotsEnhancements:
         obj = SlottedClass(name="test", value=42)
 
         # Should have __slots__ but no __dict__
-        assert hasattr(SlottedClass, '__slots__')
-        assert not hasattr(obj, '__dict__')
+        assert hasattr(SlottedClass, "__slots__")
+        assert not hasattr(obj, "__dict__")
 
         # Should still work normally
         assert obj.name == "test"
@@ -92,6 +97,7 @@ class TestSlotsEnhancements:
 
     def test_slots_with_default_values(self):
         """Test slots with default values and field factories."""
+
         class SlottedWithDefaults(Classno):
             __features__ = Features.SLOTS
             name: str
@@ -102,8 +108,8 @@ class TestSlotsEnhancements:
         obj = SlottedWithDefaults(name="test")
 
         # Should have __slots__ but no __dict__
-        assert hasattr(SlottedWithDefaults, '__slots__')
-        assert not hasattr(obj, '__dict__')
+        assert hasattr(SlottedWithDefaults, "__slots__")
+        assert not hasattr(obj, "__dict__")
 
         # Defaults should work
         assert obj.name == "test"
@@ -117,6 +123,7 @@ class TestSlotsEnhancements:
 
     def test_slots_with_inheritance(self):
         """Test slots with inheritance."""
+
         class BaseSlotted(Classno):
             __features__ = Features.SLOTS
             base_field: str
@@ -127,8 +134,8 @@ class TestSlotsEnhancements:
         obj = ChildSlotted(base_field="base", child_field=42)
 
         # Should have __slots__ including inherited fields
-        assert hasattr(ChildSlotted, '__slots__')
-        assert not hasattr(obj, '__dict__')
+        assert hasattr(ChildSlotted, "__slots__")
+        assert not hasattr(obj, "__dict__")
 
         # Should access all fields
         assert obj.base_field == "base"
@@ -136,6 +143,7 @@ class TestSlotsEnhancements:
 
     def test_immutable_uses_slots_properly(self):
         """Test that IMMUTABLE feature properly uses slots without __dict__."""
+
         class ImmutableData(Classno):
             __features__ = Features.IMMUTABLE
             id: int
@@ -145,8 +153,8 @@ class TestSlotsEnhancements:
         obj = ImmutableData(id=1, name="test", data=["a", "b"])
 
         # Should have slots without __dict__
-        assert hasattr(ImmutableData, '__slots__')
-        assert not hasattr(obj, '__dict__')
+        assert hasattr(ImmutableData, "__slots__")
+        assert not hasattr(obj, "__dict__")
 
         # Should be frozen
         with pytest.raises(Exception):
@@ -162,6 +170,7 @@ class TestHashEnhancements:
 
     def test_hash_with_list_fields(self):
         """Test hashing objects with list fields."""
+
         class WithList(Classno):
             __features__ = Features.HASH
             name: str
@@ -182,6 +191,7 @@ class TestHashEnhancements:
 
     def test_hash_with_dict_fields(self):
         """Test hashing objects with dict fields."""
+
         class WithDict(Classno):
             __features__ = Features.HASH
             name: str
@@ -202,6 +212,7 @@ class TestHashEnhancements:
 
     def test_hash_with_set_fields(self):
         """Test hashing objects with set fields."""
+
         class WithSet(Classno):
             __features__ = Features.HASH
             name: str
@@ -222,16 +233,19 @@ class TestHashEnhancements:
 
     def test_hash_with_complex_collections(self):
         """Test hashing with complex collection types."""
+
         class ComplexCollections(Classno):
             __features__ = Features.HASH
             name: str
             deque_field: deque = field(default_factory=deque)
-            defaultdict_field: defaultdict = field(default_factory=lambda: defaultdict(list))
+            defaultdict_field: defaultdict = field(
+                default_factory=lambda: defaultdict(list)
+            )
 
         obj1 = ComplexCollections(
             name="test",
             deque_field=deque([1, 2, 3]),
-            defaultdict_field=defaultdict(list, {"a": [1, 2]})
+            defaultdict_field=defaultdict(list, {"a": [1, 2]}),
         )
 
         # Should be hashable despite complex collection fields
@@ -244,6 +258,7 @@ class TestInheritanceEnhancements:
 
     def test_field_inheritance_from_multiple_levels(self):
         """Test field inheritance across multiple inheritance levels."""
+
         class GrandParent(Classno):
             grand_field: str
 
@@ -263,10 +278,13 @@ class TestInheritanceEnhancements:
 
         # Should validate all inherited fields
         with pytest.raises(ValidationError):
-            Child(grand_field=123, parent_field=42, child_field=3.14)  # wrong type for grand_field
+            Child(
+                grand_field=123, parent_field=42, child_field=3.14
+            )  # wrong type for grand_field
 
     def test_field_inheritance_with_multiple_inheritance(self):
         """Test field inheritance with multiple inheritance (mixin pattern)."""
+
         class TimestampMixin(Classno):
             created_at: str = "2023-01-01"
 
@@ -292,6 +310,7 @@ class TestInheritanceEnhancements:
 
     def test_field_override_in_inheritance(self):
         """Test field type override in inheritance."""
+
         class Base(Classno):
             value: int = 0
 
@@ -312,6 +331,7 @@ class TestInheritanceEnhancements:
 
     def test_mro_field_resolution(self):
         """Test that field resolution follows Method Resolution Order correctly."""
+
         class A(Classno):
             field: str = "A"
 

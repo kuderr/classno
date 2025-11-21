@@ -340,9 +340,10 @@ class TestErrorHandling:
             valid_field: str
             invalid_field: int
 
-        # This might create an object in an inconsistent state depending on implementation
+        # This might create an object in an inconsistent state
+        # depending on implementation
         try:
-            obj = PartiallyValid(valid_field="test", invalid_field="not an int")
+            _ = PartiallyValid(valid_field="test", invalid_field="not an int")
             assert False, "Should have raised ValidationError"
         except ValidationError:
             # Expected behavior - object creation should fail completely

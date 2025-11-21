@@ -17,6 +17,7 @@ class TestValidationFeature:
 
     def test_basic_type_validation(self):
         """Test basic type validation for primitive types."""
+
         class ValidatedModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -33,19 +34,28 @@ class TestValidationFeature:
 
         # Invalid types should raise ValidationError
         with pytest.raises(ValidationError):
-            ValidatedModel(name=123, age=30, score=95.5, active=True)  # name should be str
+            ValidatedModel(
+                name=123, age=30, score=95.5, active=True
+            )  # name should be str
 
         with pytest.raises(ValidationError):
-            ValidatedModel(name="John", age="30", score=95.5, active=True)  # age should be int
+            ValidatedModel(
+                name="John", age="30", score=95.5, active=True
+            )  # age should be int
 
         with pytest.raises(ValidationError):
-            ValidatedModel(name="John", age=30, score="95.5", active=True)  # score should be float
+            ValidatedModel(
+                name="John", age=30, score="95.5", active=True
+            )  # score should be float
 
         with pytest.raises(ValidationError):
-            ValidatedModel(name="John", age=30, score=95.5, active="yes")  # active should be bool
+            ValidatedModel(
+                name="John", age=30, score=95.5, active="yes"
+            )  # active should be bool
 
     def test_list_validation(self):
         """Test validation of list types."""
+
         class ListModel(Classno):
             __features__ = Features.VALIDATION
             numbers: List[int]
@@ -56,7 +66,7 @@ class TestValidationFeature:
         model = ListModel(
             numbers=[1, 2, 3, 4, 5],
             names=["Alice", "Bob", "Charlie"],
-            mixed=[1, "hello", 42, "world"]
+            mixed=[1, "hello", 42, "world"],
         )
         assert model.numbers == [1, 2, 3, 4, 5]
         assert model.names == ["Alice", "Bob", "Charlie"]
@@ -74,6 +84,7 @@ class TestValidationFeature:
 
     def test_dict_validation(self):
         """Test validation of dictionary types."""
+
         class DictModel(Classno):
             __features__ = Features.VALIDATION
             str_to_int: Dict[str, int]
@@ -84,7 +95,7 @@ class TestValidationFeature:
         model = DictModel(
             str_to_int={"a": 1, "b": 2, "c": 3},
             int_to_list={1: ["hello"], 2: ["world", "test"]},
-            flexible={"num": 42, "text": "hello", "other": 100}
+            flexible={"num": 42, "text": "hello", "other": 100},
         )
         assert model.str_to_int == {"a": 1, "b": 2, "c": 3}
         assert model.int_to_list == {1: ["hello"], 2: ["world", "test"]}
@@ -92,13 +103,18 @@ class TestValidationFeature:
 
         # Invalid dictionary types
         with pytest.raises(ValidationError):
-            DictModel(str_to_int={1: "wrong"}, int_to_list={}, flexible={})  # key should be str
+            DictModel(
+                str_to_int={1: "wrong"}, int_to_list={}, flexible={}
+            )  # key should be str
 
         with pytest.raises(ValidationError):
-            DictModel(str_to_int={"a": "wrong"}, int_to_list={}, flexible={})  # value should be int
+            DictModel(
+                str_to_int={"a": "wrong"}, int_to_list={}, flexible={}
+            )  # value should be int
 
     def test_tuple_validation(self):
         """Test validation of tuple types."""
+
         class TupleModel(Classno):
             __features__ = Features.VALIDATION
             coordinates: Tuple[float, float]
@@ -109,7 +125,7 @@ class TestValidationFeature:
         model = TupleModel(
             coordinates=(10.5, 20.3),
             fixed_size=(42, "hello", True),
-            variable=(1, 2, 3, 4, 5)
+            variable=(1, 2, 3, 4, 5),
         )
         assert model.coordinates == (10.5, 20.3)
         assert model.fixed_size == (42, "hello", True)
@@ -117,13 +133,18 @@ class TestValidationFeature:
 
         # Invalid tuple types
         with pytest.raises(ValidationError):
-            TupleModel(coordinates=("a", "b"), fixed_size=(1, "test", True), variable=(1, 2))
+            TupleModel(
+                coordinates=("a", "b"), fixed_size=(1, "test", True), variable=(1, 2)
+            )
 
         with pytest.raises(ValidationError):
-            TupleModel(coordinates=(1.0, 2.0), fixed_size=(1, 2, 3), variable=(1, 2))  # wrong type in fixed_size
+            TupleModel(
+                coordinates=(1.0, 2.0), fixed_size=(1, 2, 3), variable=(1, 2)
+            )  # wrong type in fixed_size
 
     def test_optional_validation(self):
         """Test validation with Optional types."""
+
         class OptionalModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -151,6 +172,7 @@ class TestValidationFeature:
 
     def test_union_validation(self):
         """Test validation with Union types."""
+
         class UnionModel(Classno):
             __features__ = Features.VALIDATION
             value: Union[int, str]
@@ -170,13 +192,18 @@ class TestValidationFeature:
 
         # Invalid union values
         with pytest.raises(ValidationError):
-            UnionModel(value=[], number=10, complex_union=[1, 2, 3])  # list not in Union[int, str]
+            UnionModel(
+                value=[], number=10, complex_union=[1, 2, 3]
+            )  # list not in Union[int, str]
 
         with pytest.raises(ValidationError):
-            UnionModel(value=42, number="invalid", complex_union=[1, 2, 3])  # str not in Union[int, float]
+            UnionModel(
+                value=42, number="invalid", complex_union=[1, 2, 3]
+            )  # str not in Union[int, float]
 
     def test_nested_type_validation(self):
         """Test validation of complex nested types."""
+
         class NestedModel(Classno):
             __features__ = Features.VALIDATION
             matrix: List[List[int]]
@@ -189,8 +216,8 @@ class TestValidationFeature:
             lookup={"group1": {"a": 1.0, "b": 2.0}, "group2": {"c": 3.0}},
             complex_structure={
                 "items": [(1, "first"), (2, "second")],
-                "other": [(10, "ten"), (20, "twenty")]
-            }
+                "other": [(10, "ten"), (20, "twenty")],
+            },
         )
         assert model.matrix == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         assert model.lookup == {"group1": {"a": 1.0, "b": 2.0}, "group2": {"c": 3.0}}
@@ -201,18 +228,19 @@ class TestValidationFeature:
             NestedModel(
                 matrix=[[1, "invalid", 3]],  # string in list of ints
                 lookup={},
-                complex_structure={}
+                complex_structure={},
             )
 
         with pytest.raises(ValidationError):
             NestedModel(
                 matrix=[[1, 2, 3]],
                 lookup={"group": {"key": "invalid"}},  # string instead of float
-                complex_structure={}
+                complex_structure={},
             )
 
     def test_validation_with_defaults(self):
         """Test that validation works with default values."""
+
         class DefaultValidatedModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -229,6 +257,7 @@ class TestValidationFeature:
 
     def test_validation_error_messages(self):
         """Test that validation errors provide helpful messages."""
+
         class MessageModel(Classno):
             __features__ = Features.VALIDATION
             name: str
@@ -243,6 +272,7 @@ class TestValidationFeature:
 
     def test_validation_combined_with_other_features(self):
         """Test validation combined with other features."""
+
         class CombinedModel(Classno):
             __features__ = Features.VALIDATION | Features.EQ | Features.FROZEN
             name: str
