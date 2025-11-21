@@ -56,7 +56,7 @@ license = "X11 License Distribution Modification Variant"
 name = "classno"
 readme = "README.md"
 repository = "https://github.com/kuderr/classno"
-version = "0.0.8"
+version = "0.1.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
