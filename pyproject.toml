@@ -47,7 +47,7 @@ cmd = "poetry run pytest tests/ --cov=classno --cov-report=html --cov-report=ter
 [tool.poetry]
 authors = ["kuderr <dakudryavcev@gmail.com>"]
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 4 - Beta",
   "Topic :: Software Development :: Libraries"
 ]
 description = ""
